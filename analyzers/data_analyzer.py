@@ -1,10 +1,24 @@
-def analyze_data(data_list: list) -> list:
+from telegram_bot.message_formatter import format_message
+
+
+def analyze_events(events: list) -> list:
     """
-    수집된 데이터 중 신뢰할 만한 데이터만 필터링하여 반환합니다.
-    이 예시에서는 모델과 가격 정보가 모두 존재하는 데이터만 신뢰할 수 있다고 판단합니다.
+    Groups similar events (by type and model) and aggregates them.
+    Increases confidence based on the number of occurrences.
+    Returns only events with aggregated confidence >= 0.8.
     """
-    trusted_data = []
-    for data in data_list:
-        if data.get('price') and data.get('model'):
-            trusted_data.append(data)
-    return trusted_data
+    grouped = {}
+    for event in events:
+        key = (event.get("type"), event.get("model"))
+        grouped.setdefault(key, []).append(event)
+
+    aggregated_events = []
+    for key, group in grouped.items():
+        base_event = max(group, key=lambda e: e.get("confidence", 0))
+        count = len(group)
+        aggregated_confidence = min(base_event.get("confidence", 0) + 0.1 * (count - 1), 1.0)
+        base_event["confidence"] = aggregated_confidence
+        if aggregated_confidence >= 0.8:
+            base_event["formatted_message"] = format_message(base_event)
+            aggregated_events.append(base_event)
+    return aggregated_events

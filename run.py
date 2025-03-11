@@ -1,39 +1,88 @@
+import threading
 import time
+
 import schedule
-import logging
+
+from analyzers.data_analyzer import analyze_events
+from analyzers.nlp_processor import extract_events_from_article
 from config import SCRAPE_INTERVAL
-from scrapers.tesla_scraper import scrape_tesla_info
-from analyzers.data_analyzer import analyze_data
-from telegram_bot.bot import send_message
-from telegram_bot.message_formatter import format_message
+from scrapers.electrek_scraper import fetch_electrek_tesla_news
+from scrapers.insideevs_scraper import fetch_insideevs_tesla_news
+from scrapers.tesla_official_scraper import fetch_tesla_official_blog
+from telegram_bot.bot import send_message, start_telegram_bot
 from utils.logger import setup_logger
+from utils.storage import publish_event, save_article, save_event
 
 logger = setup_logger()
 
+
 def job():
-    logger.info("스크래핑 작업 시작...")
-    data_list = scrape_tesla_info()
-    if not data_list:
-        logger.info("스크래핑된 데이터가 없습니다.")
+    logger.info("=== Starting scraping job ===")
+    articles = []
+    try:
+        articles.extend(fetch_tesla_official_blog())
+    except Exception as e:
+        logger.error(f"Error scraping Tesla official blog: {e}")
+    try:
+        articles.extend(fetch_electrek_tesla_news())
+    except Exception as e:
+        logger.error(f"Error scraping Electrek: {e}")
+    try:
+        articles.extend(fetch_insideevs_tesla_news())
+    except Exception as e:
+        logger.error(f"Error scraping InsideEVs: {e}")
+
+    if not articles:
+        logger.info("No new articles found.")
         return
-    trusted_data = analyze_data(data_list)
-    if not trusted_data:
-        logger.info("신뢰할 만한 데이터가 없습니다.")
+
+    all_events = []
+    for article in articles:
+        try:
+            # Save article to DB (handles duplicate checking)
+            save_article(article)
+        except Exception as e:
+            logger.error(f"Error saving article: {e}")
+        events = extract_events_from_article(article)
+        if events:
+            for event in events:
+                all_events.append(event)
+
+    if not all_events:
+        logger.info("No events extracted from articles.")
         return
-    for data in trusted_data:
-        message = format_message(data)
-        send_message(message)
-        logger.info("텔레그램 메시지 전송 완료.")
+
+    trusted_events = analyze_events(all_events)
+    if not trusted_events:
+        logger.info("Only low-confidence events detected.")
+        return
+
+    for event in trusted_events:
+        try:
+            save_event(event)
+            publish_event(event)
+            # Send alert to the default Telegram group
+            message = event.get("formatted_message")
+            send_message(message)
+            logger.info("Group alert sent.")
+        except Exception as e:
+            logger.error(f"Error saving/sending event: {e}")
+
 
 def main():
-    logger.info("Tesla Alert Bot 시작.")
-    # 애플리케이션 시작 시 즉시 작업 실행
+    logger.info("Starting Tesla Alert Bot.")
+    # Start Telegram bot (for subscription management) in a separate thread
+    telegram_thread = threading.Thread(target=start_telegram_bot, daemon=True)
+    telegram_thread.start()
+
+    # Run initial job and then schedule periodic jobs
     job()
-    # 설정한 간격마다 작업 스케줄링
     schedule.every(SCRAPE_INTERVAL).seconds.do(job)
+
     while True:
         schedule.run_pending()
         time.sleep(1)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
