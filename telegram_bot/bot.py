@@ -1,13 +1,11 @@
 from telegram import Bot
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
+from config import BOT_TOKEN, GROUP_ID
 from telegram_bot.command_handler import change_language, handle_text
 from utils.logger import setup_logger
 
 logger = setup_logger()
-# 실제 토큰과 그룹 ID는 config.py 또는 환경변수에서 불러오도록 수정 가능
-BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
-GROUP_ID = "YOUR_TELEGRAM_GROUP_ID"
 
 bot = Bot(token=BOT_TOKEN)
 
