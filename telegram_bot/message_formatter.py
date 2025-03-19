@@ -1,29 +1,36 @@
-def format_message(event: dict) -> str:
-    """
-    Example event:
-    {
-        "type": "Price Change" or "New Car Release",
-        "model": "Model S",
-        "details": "Price changed from $79,990 to $89,990.",
-        "source": "Tesla Official Blog",
-        "confidence": 0.95,
-        "url": "https://www.tesla.com/blog/..."
-    }
-    """
-    if event.get("type") == "Price Change":
-        message = "🚗 *Tesla Price Change Alert*\n\n"
-        message += f"*Model:* {event.get('model', 'N/A')}\n"
-        message += f"*Details:* {event.get('details', 'N/A')}\n"
-    elif event.get("type") == "New Car Release":
-        message = "🚗 *New Tesla Model Release Alert*\n\n"
-        message += f"*Model:* {event.get('model', 'N/A')}\n"
-        message += f"*Details:* {event.get('details', 'N/A')}\n"
-    else:
-        message = "🚗 *Tesla News Alert*\n\n"
-        message += f"*Content:* {event.get('details', 'N/A')}\n"
+from datetime import datetime
 
-    message += f"\n*Source:* {event.get('source', 'N/A')}\n"
-    message += f"*Confidence:* {event.get('confidence', 'N/A')}\n"
-    if event.get("url"):
-        message += f"*More Info:* {event.get('url')}\n"
-    return message
+
+def format_message(news_group, language="ko"):
+    """
+    news_group: 리스트, 각 항목은 (title, source, trust, content, category)
+    language: 'ko' 또는 'en'
+    """
+    lines = []
+    if language == "ko":
+        now = datetime.now().strftime("%Y년 %m월 %d일 %H:%M")
+        header = f"## 테슬라 뉴스 업데이트 ({now})"
+    else:
+        now = datetime.now().strftime("%B %d, %Y %H:%M")
+        header = f"## Tesla News Update ({now})"
+    lines.append(header)
+    lines.append("")
+    for item in news_group:
+        title, source, trust, content, category = item
+        emoji = ""
+        if category == "price_up":
+            emoji = "🔺"
+        elif category == "price_down":
+            emoji = "🔻"
+        elif category == "new_model":
+            emoji = "🚗✨"
+        elif category == "announcement":
+            emoji = "📢"
+        trust_pct = int(trust * 100)
+        if language == "ko":
+            line = f"{emoji} **{title}**  \n*출처: {source}, 신뢰도: {trust_pct}%*  \n{content}"
+        else:
+            line = f"{emoji} **{title}**  \n*Source: {source}, Trust: {trust_pct}%*  \n{content}"
+        lines.append(line)
+        lines.append("")
+    return "\n".join(lines)

@@ -1,63 +1,33 @@
-import logging
+from telegram import Bot
+from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
-from telegram import Bot, Update
-from telegram.ext import CallbackContext, CommandHandler, Filters, MessageHandler, Updater
+from telegram_bot.command_handler import change_language, handle_text
+from utils.logger import setup_logger
 
-from config import TELEGRAM_BOT_TOKEN, TELEGRAM_GROUP_ID
-from telegram_bot import subscription_manager
+logger = setup_logger()
+# 실제 토큰과 그룹 ID는 config.py 또는 환경변수에서 불러오도록 수정 가능
+BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
+GROUP_ID = "YOUR_TELEGRAM_GROUP_ID"
 
-logger = logging.getLogger(__name__)
-bot = Bot(token=TELEGRAM_BOT_TOKEN)
-
-
-def send_message(text: str, chat_id: str = TELEGRAM_GROUP_ID):
-    try:
-        bot.send_message(chat_id=chat_id, text=text, parse_mode="Markdown")
-    except Exception as e:
-        logger.error(f"Error sending Telegram message: {e}")
+bot = Bot(token=BOT_TOKEN)
 
 
-def subscribe(update: Update, context: CallbackContext):
-    chat_id = update.effective_chat.id
-    if not context.args:
-        update.message.reply_text("Usage: /subscribe <keyword>")
-        return
-    keyword = " ".join(context.args)
-    subscription_manager.add_subscription(chat_id, keyword)
-    update.message.reply_text(f"✅ Subscribed to keyword '{keyword}'.")
+def send_message_to_group(text):
+    """텔레그램 그룹 채팅으로 메시지 전송"""
+    bot.send_message(chat_id=GROUP_ID, text=text, parse_mode="Markdown")
 
 
-def unsubscribe(update: Update, context: CallbackContext):
-    chat_id = update.effective_chat.id
-    if not context.args:
-        update.message.reply_text("Usage: /unsubscribe <keyword>")
-        return
-    keyword = " ".join(context.args)
-    subscription_manager.remove_subscription(chat_id, keyword)
-    update.message.reply_text(f"✅ Unsubscribed from keyword '{keyword}'.")
-
-
-def list_subscriptions(update: Update, context: CallbackContext):
-    chat_id = update.effective_chat.id
-    subs = subscription_manager.list_subscriptions(chat_id)
-    if subs:
-        update.message.reply_text("🔖 Your subscriptions:\n" + "\n".join(f"- {s}" for s in subs))
-    else:
-        update.message.reply_text("You have no subscriptions.")
-
-
-def unknown_command(update: Update, context: CallbackContext):
-    update.message.reply_text("Unknown command.")
+def send_message_to_user(user_id, text):
+    """특정 사용자에게 메시지 전송"""
+    bot.send_message(chat_id=user_id, text=text, parse_mode="Markdown")
 
 
 def start_telegram_bot():
-    updater = Updater(token=TELEGRAM_BOT_TOKEN, use_context=True)
+    updater = Updater(token=BOT_TOKEN, use_context=True)
     dispatcher = updater.dispatcher
 
-    dispatcher.add_handler(CommandHandler("subscribe", subscribe))
-    dispatcher.add_handler(CommandHandler("unsubscribe", unsubscribe))
-    dispatcher.add_handler(CommandHandler("subscriptions", list_subscriptions))
-    dispatcher.add_handler(MessageHandler(Filters.command, unknown_command))
+    dispatcher.add_handler(CommandHandler("language", change_language))
+    dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_text))
 
     updater.start_polling()
     updater.idle()
