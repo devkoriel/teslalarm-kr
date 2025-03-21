@@ -3,16 +3,16 @@ from datetime import datetime
 
 def format_message(news_group, language="ko"):
     """
-    news_group: 리스트, 각 항목은 (title, source, trust, content, category)
+    news_group: 리스트, 각 항목은 튜플 (title, source, trust, content, category)
     language: 'ko' 또는 'en'
     """
     lines = []
-    if language == "ko":
-        now = datetime.now().strftime("%Y년 %m월 %d일 %H:%M")
-        header = f"## 테슬라 뉴스 업데이트 ({now})"
-    else:
-        now = datetime.now().strftime("%B %d, %Y %H:%M")
-        header = f"## Tesla News Update ({now})"
+    now = (
+        datetime.now().strftime("%Y년 %m월 %d일 %H:%M")
+        if language == "ko"
+        else datetime.now().strftime("%B %d, %Y %H:%M")
+    )
+    header = f"## 테슬라 뉴스 업데이트 ({now})" if language == "ko" else f"## Tesla News Update ({now})"
     lines.append(header)
     lines.append("")
     for item in news_group:

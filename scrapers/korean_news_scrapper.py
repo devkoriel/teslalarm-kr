@@ -3,10 +3,13 @@ from bs4 import BeautifulSoup
 
 
 def fetch_naver_news():
-    """네이버 뉴스에서 '테슬라 가격' 관련 기사를 수집."""
+    """
+    네이버 뉴스에서 '테슬라 가격' 관련 기사를 스크래핑.
+    반환: 리스트, 각 항목은 dict {title, url, source, content, published}
+    """
     url = "https://search.naver.com/search.naver?where=news&query=테슬라 가격"
     headers = {"User-Agent": "Mozilla/5.0"}
-    res = requests.get(url, headers=headers)
+    res = requests.get(url, headers=headers, timeout=10)
     res.raise_for_status()
     soup = BeautifulSoup(res.text, "html.parser")
     news_items = []

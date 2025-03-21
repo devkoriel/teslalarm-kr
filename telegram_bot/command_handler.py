@@ -20,5 +20,4 @@ def change_language(update: Update, context: CallbackContext):
 
 
 def handle_text(update: Update, context: CallbackContext):
-    # 기본 응답: 명령어 안내
-    update.message.reply_text("명령어를 확인하세요. /language ko 또는 /language en")
+    update.message.reply_text("명령어를 확인하세요. 예: /language ko 또는 /language en")

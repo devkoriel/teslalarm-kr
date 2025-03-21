@@ -3,7 +3,10 @@ from bs4 import BeautifulSoup
 
 
 def fetch_electrek_news():
-    """Electrek RSS 피드를 활용해 테슬라 관련 뉴스를 수집."""
+    """
+    Electrek RSS 피드를 활용해 테슬라 관련 뉴스를 수집.
+    반환: 리스트, 각 항목은 dict {title, url, source, content, published}
+    """
     feed_url = "https://electrek.co/guides/tesla/feed"
     feed = feedparser.parse(feed_url)
     news_items = []
