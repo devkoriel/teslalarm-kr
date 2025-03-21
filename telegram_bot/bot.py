@@ -1,18 +1,18 @@
 from telegram import Bot
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
-from config import BOT_TOKEN, GROUP_ID
+from config import TELEGRAM_BOT_TOKEN, TELEGRAM_GROUP_ID
 from telegram_bot.command_handler import change_language, handle_text
 from utils.logger import setup_logger
 
 logger = setup_logger()
 
-bot = Bot(token=BOT_TOKEN)
+bot = Bot(token=TELEGRAM_BOT_TOKEN)
 
 
 def send_message_to_group(text):
     """텔레그램 그룹 채팅으로 메시지 전송"""
-    bot.send_message(chat_id=GROUP_ID, text=text, parse_mode="Markdown")
+    bot.send_message(chat_id=TELEGRAM_GROUP_ID, text=text, parse_mode="Markdown")
 
 
 def send_message_to_user(user_id, text):
@@ -21,7 +21,7 @@ def send_message_to_user(user_id, text):
 
 
 def start_telegram_bot():
-    updater = Updater(token=BOT_TOKEN, use_context=True)
+    updater = Updater(token=TELEGRAM_BOT_TOKEN, use_context=True)
     dispatcher = updater.dispatcher
 
     dispatcher.add_handler(CommandHandler("language", change_language))
