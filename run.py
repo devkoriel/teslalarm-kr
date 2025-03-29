@@ -1,8 +1,7 @@
 import asyncio
 
-from analyzers.trust_evaluator import categorize_news_with_openai, summarize_news_with_openai
 from config import SCRAPE_INTERVAL, TELEGRAM_GROUP_ID
-from scrapers.data_fetcher import collect_all_news
+from scrapers.data_fetcher import collect_domestic_news
 from telegram_bot.bot import create_application, send_message_to_group
 from utils.cache import is_duplicate
 from utils.logger import setup_logger
@@ -12,50 +11,35 @@ logger = setup_logger()
 
 async def process_news():
     logger.info("process_news 시작")
-    # 1. 뉴스 수집: 글로벌, 한국, Tesla 공식 뉴스
-    news_items = []
-    try:
-        news_items.extend(collect_all_news())
-    except Exception as e:
-        logger.error(f"국내/글로벌 뉴스 수집 오류: {e}")
-    logger.info(f"수집된 전체 뉴스 개수: {len(news_items)}")
-    if not news_items:
-        logger.info("뉴스가 없습니다.")
-        await send_message_to_group("테스트: 새로운 뉴스가 없습니다.")
-        return
+    domestic_news = collect_domestic_news()  # 각 뉴스 dict에 "news_type": "domestic" 추가됨
+    logger.info(f"총 수집 뉴스 - 국내: {len(domestic_news)}")
 
-    # 2. 중복 제거
-    unique_news = [news for news in news_items if not is_duplicate(news)]
-    logger.info(f"중복 제거 후 뉴스 개수: {len(unique_news)}")
-    if not unique_news:
-        logger.info("모든 뉴스가 중복되었습니다.")
-        await send_message_to_group("테스트: 중복된 뉴스가 모두 처리되었습니다.")
-        return
+    # 중복 제거
+    domestic_clean = [n for n in domestic_news if not is_duplicate(n)]
 
-    # 3. 뉴스 통합 요약 (제목 및 전체 콘텐츠 포함)
-    try:
-        consolidated = await summarize_news_with_openai(unique_news, language="ko")
-        logger.info("통합 뉴스 작성 완료")
-    except Exception as e:
-        logger.error(f"뉴스 통합 요약 오류: {e}")
-        return
+    # consolidated 텍스트는 각 그룹의 뉴스들을 합쳐서 만듭니다.
+    domestic_text = " ".join(f"제목: {n.get('title')} 내용: {n.get('content')}" for n in domestic_clean)
 
-    # 4. 카테고리 분류
-    try:
-        categories = await categorize_news_with_openai(consolidated, language="ko")
-        logger.info("카테고리 분류 완료")
-    except Exception as e:
-        logger.error(f"뉴스 카테고리 분류 오류: {e}")
-        return
+    from analyzers.trust_evaluator import analyze_and_extract_fields
 
-    # 5. 각 카테고리별로 Telegram 메시지 전송
-    for category, summary in categories.items():
-        message = f"<b>{category}</b>\n{summary}"
-        try:
-            await send_message_to_group(message)
-            logger.info(f"[{category}] 메시지 전송 완료")
-        except Exception as e:
-            logger.error(f"[{category}] 메시지 전송 오류: {e}")
+    # OpenAI API 호출 (각 그룹별)
+    domestic_result = await analyze_and_extract_fields(domestic_text, language="ko")
+
+    logger.info(f"분석 결과 - 국내: {domestic_result}")
+
+    # domestic_result, overseas_result는 JSON 형식의 딕셔너리로 반환됨
+    from telegram_bot.message_formatter import format_detailed_message
+
+    domestic_messages = format_detailed_message(domestic_result, "domestic", language="ko")
+
+    # 미리 정의된 카테고리별 메시지 전송 (내용이 있으면)
+    for cat, message in domestic_messages.items():
+        if message.strip():
+            try:
+                await send_message_to_group(message)
+                logger.info(f"[domestic][{cat}] 메시지 전송 완료")
+            except Exception as e:
+                logger.error(f"[domestic][{cat}] 메시지 전송 오류: {e}")
     logger.info("process_news 완료")
 
 

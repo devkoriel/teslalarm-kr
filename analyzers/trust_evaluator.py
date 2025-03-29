@@ -1,61 +1,82 @@
+import json
+
 import openai
 
 from config import OPENAI_API_KEY
+from utils.logger import setup_logger
+
+logger = setup_logger()
 
 openai.api_key = OPENAI_API_KEY
 
 
-async def summarize_news_with_openai(news_list: list, language: str = "ko") -> str:
-    """
-    여러 뉴스 항목(제목과 전체 콘텐츠 포함)을 하나의 통합 기사로 작성합니다.
-    중복된 내용은 제거하고 중요한 정보를 요약한 결과를 반환합니다.
-    """
-    consolidated = "다음은 Tesla 관련 여러 뉴스입니다:\n"
-    for news in news_list:
-        consolidated += f"제목: {news.get('title')}\n내용: {news.get('content')}\n\n"
+async def analyze_and_extract_fields(consolidated_text: str, language: str = "ko") -> dict:
     prompt = (
-        f"아래 뉴스들을 하나의 통합 기사로 작성해줘. 중복된 내용을 제거하고, 중요한 정보만 간략히 요약하여 {language}로 작성해줘.\n\n"
-        f"{consolidated}"
+        "아래 Tesla 뉴스 기사를 분석하여, 미리 정의된 카테고리별로 여러 뉴스들을 중복 제거해서 분류하고, "
+        "각 뉴스 항목에 대해 필요한 정보를 아래 필드로 정리해줘.\n\n"
+        "1. 차량 모델 가격 상승: 'price', 'change', 'details', 'published' (발표 일시), 'trust' (신뢰도 0~1), 'trust_reason' (신뢰도 판단 기준)\n"
+        "2. 차량 모델 가격 하락: 'price', 'change', 'details', 'published', 'trust', 'trust_reason'\n"
+        "3. 새로운 차량 모델 출시: 'model_name', 'release_date', 'details', 'published', 'trust', 'trust_reason'\n"
+        "4. 자율주행 기능 업데이트: 'feature', 'update_details', 'published', 'trust', 'trust_reason'\n"
+        "5. 소프트웨어 및 기능 업데이트: 'update_title', 'update_details', 'published', 'trust', 'trust_reason'\n"
+        "6. 충전 인프라 확충 및 서비스 소식: 'infrastructure_details', 'published', 'trust', 'trust_reason'\n"
+        "7. 배터리 및 성능 혁신: 'battery_details', 'published', 'trust', 'trust_reason'\n"
+        "8. 정부 정책 및 규제 동향: 'policy_details', 'published', 'trust', 'trust_reason'\n"
+        "9. 테슬라 생산 및 공급망 뉴스: 'production_details', 'published', 'trust', 'trust_reason'\n"
+        "10. 테슬라 주식 및 투자 동향: 'stock_details', 'published', 'trust', 'trust_reason'\n"
+        "11. 일론 머스크 및 테슬라 CEO 인터뷰/발언: 'statement_details', 'published', 'trust', 'trust_reason'\n"
+        "12. 글로벌 테슬라 동향: 'trend_details', 'published', 'trust', 'trust_reason'\n"
+        "13. 테슬라 서비스 및 고객 경험: 'service_details', 'published', 'trust', 'trust_reason'\n"
+        "14. 테슬라 관련 법률 및 소송: 'legal_details', 'published', 'trust', 'trust_reason'\n"
+        "15. 테슬라 이벤트 및 팬 모임 소식: 'event_details', 'published', 'trust', 'trust_reason'\n"
+        "16. 테슬라 기술 및 사이버 보안 이슈: 'security_details', 'published', 'trust', 'trust_reason'\n"
+        "17. 테슬라와 경쟁사 비교: 'comparison_details', 'published', 'trust', 'trust_reason'\n"
+        "18. 미래 모빌리티 및 로보택시/사이버트럭 등: 'mobility_details', 'published', 'trust', 'trust_reason'\n"
+        "19. 테슬라 브랜드 이미지 및 마케팅 전략: 'marketing_details', 'published', 'trust', 'trust_reason'\n"
+        "20. 테슬라 인수합병 및 기업 전략: 'strategy_details', 'published', 'trust', 'trust_reason'\n"
+        "21. 테슬라 팬 커뮤니티 및 소셜 미디어 트렌드: 'community_details', 'published', 'trust', 'trust_reason'\n"
+        "22. 경제·금융 및 산업 분석: 'analysis_details', 'published', 'trust', 'trust_reason'\n\n"
+        "출력은 반드시 아래 JSON 형식으로 해줘 (미리 정의된 카테고리에 속하지 않는 뉴스는 출력하지 말아줘):\n"
+        "{\n"
+        '  "model_price_up": [ { "title": "...", "price": "...", "change": "...", "details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
+        '  "model_price_down": [ { "title": "...", "price": "...", "change": "...", "details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
+        '  "new_model": [ { "title": "...", "model_name": "...", "release_date": "...", "details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
+        '  "autonomous_update": [ { "title": "...", "feature": "...", "update_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
+        '  "software_update": [ { "title": "...", "update_title": "...", "update_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
+        '  "infrastructure_update": [ { "title": "...", "infrastructure_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
+        '  "battery_update": [ { "title": "...", "battery_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
+        '  "policy_update": [ { "title": "...", "policy_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
+        '  "production_update": [ { "title": "...", "production_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
+        '  "stock_update": [ { "title": "...", "stock_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
+        '  "ceo_statement": [ { "title": "...", "statement_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
+        '  "global_trend": [ { "title": "...", "trend_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
+        '  "service_update": [ { "title": "...", "service_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
+        '  "legal_update": [ { "title": "...", "legal_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
+        '  "event_update": [ { "title": "...", "event_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
+        '  "security_update": [ { "title": "...", "security_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
+        '  "comparison_update": [ { "title": "...", "comparison_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
+        '  "mobility_update": [ { "title": "...", "mobility_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
+        '  "marketing_update": [ { "title": "...", "marketing_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
+        '  "strategy_update": [ { "title": "...", "strategy_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
+        '  "community_update": [ { "title": "...", "community_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
+        '  "analysis_update": [ { "title": "...", "analysis_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ]\n'
+        "}\n\n"
+        "※ 모든 뉴스 항목은 한국 시장에 국한된 Tesla 관련 뉴스여야 하며, 차량 가격 관련 카테고리의 details는 반드시 가능하면 그 모델의 트림별 가격 정보를 반드시 포함해야해. 각 뉴스의 발행 일시는 '%Y년 %m월 %d일 %H:%M' 형식으로 작성해줘.\n\n"
+        "기사 텍스트:\n" + consolidated_text
     )
     response = openai.chat.completions.create(
         model="o3-mini",
         messages=[
-            {"role": "system", "content": "너는 Tesla 뉴스 전문 편집자이자 요약 전문가야."},
+            {"role": "system", "content": "너는 Tesla 뉴스 분석 전문가이자 카테고리 분류 도우미입니다."},
             {"role": "user", "content": prompt},
         ],
-        max_completion_tokens=10000,
-    )
-    print("--------------------")
-    print(response.choices[0].message.content.strip())
-    print("--------------------")
-    return response.choices[0].message.content.strip()
-
-
-async def categorize_news_with_openai(consolidated_text: str, language: str = "ko") -> dict:
-    """
-    통합된 Tesla 뉴스 기사를 분석하여,
-    1. 가격 변동, 2. 신모델 가격 정보, 3. 한국 출시 정보, 4. 중요 뉴스 등으로 분류한 결과를 JSON 형식으로 반환합니다.
-    """
-    prompt = (
-        "아래 Tesla 뉴스 기사를 분석하여 중요한 정보를 다음 카테고리로 분류해줘:\n"
-        "1. 가격 변동\n2. 신모델 가격 정보\n3. 한국 출시 정보\n4. 중요 뉴스\n\n"
-        "각 카테고리별로 핵심 내용을 2-3문장으로 요약하여 JSON 형식으로 출력해줘.\n\n"
-        f"기사:\n{consolidated_text}"
-    )
-    response = openai.chat.completions.create(
-        model="o3-mini",
-        messages=[
-            {"role": "system", "content": "너는 Tesla 뉴스 분석 전문가이자 카테고리 분류 도우미야."},
-            {"role": "user", "content": prompt},
-        ],
-        max_completion_tokens=10000,
+        max_completion_tokens=100_000,
     )
     result_text = response.choices[0].message.content.strip()
-    print(result_text)
-    import json
-
+    logger.info(f"OpenAI API 응답: {result_text}")
     try:
-        categories = json.loads(result_text)
-    except Exception:
-        categories = {"전체": result_text}
-    return categories
+        result_json = json.loads(result_text)
+    except Exception as e:
+        logger.error(f"JSON 파싱 오류: {e}")
+        result_json = {}
+    return result_json

@@ -11,5 +11,5 @@ except (TypeError, ValueError):
     TELEGRAM_GROUP_ID = None
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 REDIS_URL = os.getenv("REDIS_URL")
-SCRAPE_INTERVAL = int(os.getenv("SCRAPE_INTERVAL", 600))  # 600초 = 10분
+SCRAPE_INTERVAL = int(os.getenv("SCRAPE_INTERVAL", 300))  # 기본 300초 (5분)
 DATABASE_URL = os.getenv("DATABASE_URL")
