@@ -1,3 +1,4 @@
+import re
 from io import BytesIO
 from urllib.parse import urljoin
 
@@ -295,9 +296,9 @@ def fetch_etnews_news():
 
 def fetch_heraldcorp_news():
     try:
-        base_url = "https://www.heraldcorp.com"
+        base_url = "https://biz.heraldcorp.com"
         # Heraldcorp 뉴스 목록 페이지 URL (필요에 따라 변경)
-        list_url = base_url + "/news"  # 실제 목록 페이지 URL로 수정 필요
+        list_url = base_url + "/search?q=%ED%85%8C%EC%8A%AC%EB%9D%BC"  # 실제 목록 페이지 URL로 수정 필요
         status, res_text = pycurl_get(list_url, headers=HEADERS, timeout=10)
         if status != 200:
             raise Exception(f"HTTP status {status}")
@@ -405,6 +406,76 @@ def fetch_donga_news():
         return items
     except Exception as e:
         logger.error(f"동아닷컴 뉴스 수집 오류: {e}")
+        return []
+
+
+def fetch_edaily_news():
+    try:
+        # 이데일리 뉴스 목록 페이지 URL (필요에 따라 파라미터 조정)
+        url = "https://www.edaily.co.kr/search/index?source=total&keyword=%ED%85%8C%EC%8A%AC%EB%9D%BC&include=&exclude=&jname=&start=&end=&sort=latest&date=all_period&exact=false"
+        status, res_text = pycurl_get(url, headers=HEADERS, timeout=10)
+        if status != 200:
+            raise Exception(f"HTTP status {status}")
+        soup = BeautifulSoup(res_text, "html.parser")
+        items = []
+        # 뉴스 목록은 <div id="newsList"> 내의 각 <div class="newsbox_04"> 요소에 있음
+        for news_box in soup.select("div#newsList div.newsbox_04"):
+            a_tag = news_box.find("a")
+            if not a_tag:
+                continue
+
+            # URL은 상대경로이므로 도메인을 붙여준다.
+            relative_url = a_tag.get("href", "")
+            full_url = "https://www.edaily.co.kr" + relative_url
+
+            # 제목은 a 태그의 title 속성이 우선, 없으면 내부 <ul class="newsbox_texts">의 첫 번째 <li> 사용
+            title = a_tag.get("title", "").strip()
+            li_tags = a_tag.select("ul.newsbox_texts li")
+            if not title and li_tags:
+                title = li_tags[0].get_text(strip=True)
+
+            # 목록 페이지의 요약은 보통 두 번째 <li>에 있음
+            summary = ""
+            if len(li_tags) > 1:
+                summary = li_tags[1].get_text(strip=True)
+
+            # 발행일 및 기자명은 <div class="author_category"> 내부에 있음
+            pub_date = ""
+            auth_div = news_box.find("div", class_="author_category")
+            if auth_div:
+                m = re.search(r"(\d{4}\.\d{2}\.\d{2})", auth_div.get_text())
+                if m:
+                    pub_date = m.group(1)
+
+            # 상세 기사 페이지에서 본문 추출: <div class="news_body" itemprop="articleBody">
+            detail_content = ""
+            try:
+                status_detail, detail_text = pycurl_get(full_url, headers=HEADERS, timeout=10)
+                if status_detail == 200:
+                    detail_soup = BeautifulSoup(detail_text, "html.parser")
+                    container = detail_soup.find("div", class_="news_body", itemprop="articleBody")
+                    if container:
+                        # <br> 태그 등도 줄바꿈 처리하여 텍스트 추출
+                        detail_content = container.get_text(separator="\n", strip=True)
+            except Exception as e:
+                logger.error(f"이데일리 상세 기사 수집 오류: {e}")
+
+            # 상세 본문이 있으면 사용하고, 없으면 목록의 요약 사용
+            content = detail_content if detail_content else summary
+
+            items.append(
+                {
+                    "title": title,
+                    "url": full_url,
+                    "source": "이데일리",
+                    "content": content,
+                    "published": pub_date,
+                    "news_type": "domestic",
+                }
+            )
+        return items
+    except Exception as e:
+        logger.error(f"이데일리 뉴스 수집 오류: {e}")
         return []
 
 
@@ -548,9 +619,9 @@ def fetch_autodaily_news():
 
 def fetch_itchosun_news():
     try:
-        base_url = "https://www.it.chosun.com"
+        base_url = "https://it.chosun.com"
         # IT조선 뉴스 목록 페이지 URL (필요에 따라 쿼리스트링 수정)
-        url = base_url + "/news/articleList.html?sc_area=I&view_type=sm"
+        url = base_url + "/news/articleList.html?sc_area=A&view_type=sm&sc_word=%ED%85%8C%EC%8A%AC%EB%9D%BC"
         status, res_text = pycurl_get(url, headers=HEADERS, timeout=10)
         if status != 200:
             raise Exception(f"HTTP status {status}")
