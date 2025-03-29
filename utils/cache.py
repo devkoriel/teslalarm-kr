@@ -1,10 +1,17 @@
 import hashlib
+import ssl
+import urllib.parse
 
 import redis
 
 from config import REDIS_URL
 
-r = redis.Redis.from_url(REDIS_URL)
+parsed_url = urllib.parse.urlparse(REDIS_URL)
+if parsed_url.scheme == "rediss":
+    # SSL 사용 시 인증서 검증 없이 연결
+    r = redis.Redis.from_url(REDIS_URL, ssl_cert_reqs=ssl.CERT_NONE)
+else:
+    r = redis.Redis.from_url(REDIS_URL)
 
 
 def generate_news_hash(news_item: dict) -> str:
