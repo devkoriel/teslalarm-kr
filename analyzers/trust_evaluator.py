@@ -70,7 +70,7 @@ async def analyze_and_extract_fields(consolidated_text: str, language: str = "ko
             {"role": "system", "content": "너는 Tesla 뉴스 분석 전문가이자 카테고리 분류 도우미입니다."},
             {"role": "user", "content": prompt},
         ],
-        max_completion_tokens=100_000,
+        max_completion_tokens=10_000,
     )
     result_text = response.choices[0].message.content.strip()
     logger.info(f"OpenAI API 응답: {result_text}")

@@ -109,7 +109,7 @@ def fetch_naver_news():
             )
         return news_items
     except Exception as e:
-        logger.error("네이버 뉴스 수집 오류: " + str(e))
+        logger.error(f"네이버 뉴스 수집 오류: {e}")
         return []
 
 
