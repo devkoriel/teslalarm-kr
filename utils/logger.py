@@ -13,7 +13,7 @@ sentry_sdk.init(dsn=SENTRY_DSN, integrations=[sentry_logging], traces_sample_rat
 
 def setup_logger():
     logging.basicConfig(
-        level=logging.DEBUG,  # DEBUG 레벨로 상세 로그 출력
+        level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(message)s",
         handlers=[logging.StreamHandler()],
     )
