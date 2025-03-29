@@ -3,10 +3,6 @@ from scrapers.korean_news_scraper import fetch_naver_news
 
 
 def collect_all_news():
-    """
-    한국 및 해외 뉴스(신뢰도 높은 매체)의 데이터를 모두 수집.
-    반환: 리스트, 각 항목은 dict {title, url, source, content, published}
-    """
     news = []
     try:
         news += fetch_naver_news()

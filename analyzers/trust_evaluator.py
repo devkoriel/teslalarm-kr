@@ -5,25 +5,57 @@ from config import OPENAI_API_KEY
 openai.api_key = OPENAI_API_KEY
 
 
-def evaluate_trust_for_group(news_items):
+async def summarize_news_with_openai(news_list: list, language: str = "ko") -> str:
     """
-    여러 뉴스 항목을 하나의 그룹으로 묶어 OpenAI API(o3-mini 모델 등)를 사용하여
-    뉴스들의 요약 및 신뢰도를 평가한다.
-    반환 예시: { "news_group": news_items, "analysis": GPT 분석 결과, "overall_trust": 0.95 }
+    여러 뉴스 항목(제목과 전체 콘텐츠 포함)을 하나의 통합 기사로 작성합니다.
+    중복된 내용은 제거하고 중요한 정보를 요약한 결과를 반환합니다.
     """
-    content = "다음은 테슬라 관련 뉴스들입니다:\n"
-    for item in news_items:
-        content += f"- [{item['source']}] {item['title']}\n"
-    content += "\n위 뉴스들의 신뢰도를 0부터 1 사이의 값으로 평가하고, 주요 포인트를 요약해줘."
-
-    response = openai.ChatCompletion.create(
+    consolidated = "다음은 Tesla 관련 여러 뉴스입니다:\n"
+    for news in news_list:
+        consolidated += f"제목: {news.get('title')}\n내용: {news.get('content')}\n\n"
+    prompt = (
+        f"아래 뉴스들을 하나의 통합 기사로 작성해줘. 중복된 내용을 제거하고, 중요한 정보만 간략히 요약하여 {language}로 작성해줘.\n\n"
+        f"{consolidated}"
+    )
+    response = openai.chat.completions.create(
         model="o3-mini",
         messages=[
-            {"role": "system", "content": "당신은 뉴스 신뢰도 평가 전문가입니다."},
-            {"role": "user", "content": content},
+            {"role": "system", "content": "너는 Tesla 뉴스 전문 편집자이자 요약 전문가야."},
+            {"role": "user", "content": prompt},
         ],
-        temperature=0.2,
+        max_completion_tokens=10000,
     )
-    analysis = response["choices"][0]["message"]["content"].strip()
-    overall_trust = 0.95  # 예시값; 실제 분석에 따라 조정
-    return {"news_group": news_items, "analysis": analysis, "overall_trust": overall_trust}
+    print("--------------------")
+    print(response.choices[0].message.content.strip())
+    print("--------------------")
+    return response.choices[0].message.content.strip()
+
+
+async def categorize_news_with_openai(consolidated_text: str, language: str = "ko") -> dict:
+    """
+    통합된 Tesla 뉴스 기사를 분석하여,
+    1. 가격 변동, 2. 신모델 가격 정보, 3. 한국 출시 정보, 4. 중요 뉴스 등으로 분류한 결과를 JSON 형식으로 반환합니다.
+    """
+    prompt = (
+        "아래 Tesla 뉴스 기사를 분석하여 중요한 정보를 다음 카테고리로 분류해줘:\n"
+        "1. 가격 변동\n2. 신모델 가격 정보\n3. 한국 출시 정보\n4. 중요 뉴스\n\n"
+        "각 카테고리별로 핵심 내용을 2-3문장으로 요약하여 JSON 형식으로 출력해줘.\n\n"
+        f"기사:\n{consolidated_text}"
+    )
+    response = openai.chat.completions.create(
+        model="o3-mini",
+        messages=[
+            {"role": "system", "content": "너는 Tesla 뉴스 분석 전문가이자 카테고리 분류 도우미야."},
+            {"role": "user", "content": prompt},
+        ],
+        max_completion_tokens=10000,
+    )
+    result_text = response.choices[0].message.content.strip()
+    print(result_text)
+    import json
+
+    try:
+        categories = json.loads(result_text)
+    except Exception:
+        categories = {"전체": result_text}
+    return categories

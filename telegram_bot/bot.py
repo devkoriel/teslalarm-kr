@@ -1,31 +1,32 @@
-from telegram import Bot
-from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
 
-from config import TELEGRAM_BOT_TOKEN, TELEGRAM_GROUP_ID
+from config import TELEGRAM_BOT_TOKEN
 from telegram_bot.command_handler import change_language, handle_text
 from utils.logger import setup_logger
 
 logger = setup_logger()
 
-bot = Bot(token=TELEGRAM_BOT_TOKEN)
+
+def create_application():
+    app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
+    app.add_handler(CommandHandler("language", change_language))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
+    return app
 
 
-def send_message_to_group(text):
-    """텔레그램 그룹 채팅으로 메시지 전송"""
-    bot.send_message(chat_id=TELEGRAM_GROUP_ID, text=text, parse_mode="Markdown")
+async def send_message_to_group(message: str):
+    from telegram import Bot
+
+    from config import TELEGRAM_BOT_TOKEN, TELEGRAM_GROUP_ID
+
+    bot = Bot(token=TELEGRAM_BOT_TOKEN)
+    await bot.send_message(chat_id=TELEGRAM_GROUP_ID, text=message, parse_mode="HTML")
 
 
-def send_message_to_user(user_id, text):
-    """특정 사용자에게 메시지 전송"""
-    bot.send_message(chat_id=user_id, text=text, parse_mode="Markdown")
+async def send_message_to_user(user_id: int, message: str):
+    from telegram import Bot
 
+    from config import TELEGRAM_BOT_TOKEN
 
-def start_telegram_bot():
-    updater = Updater(token=TELEGRAM_BOT_TOKEN, use_context=True)
-    dispatcher = updater.dispatcher
-
-    dispatcher.add_handler(CommandHandler("language", change_language))
-    dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_text))
-
-    updater.start_polling()
-    updater.idle()
+    bot = Bot(token=TELEGRAM_BOT_TOKEN)
+    await bot.send_message(chat_id=user_id, text=message, parse_mode="HTML")

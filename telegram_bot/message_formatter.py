@@ -28,9 +28,9 @@ def format_message(news_group, language="ko"):
             emoji = "📢"
         trust_pct = int(trust * 100)
         if language == "ko":
-            line = f"{emoji} **{title}**  \n*출처: {source}, 신뢰도: {trust_pct}%*  \n{content}"
+            line = f"{emoji} <b>{title}</b>\n<i>출처: {source}, 신뢰도: {trust_pct}%</i>\n{content}"
         else:
-            line = f"{emoji} **{title}**  \n*Source: {source}, Trust: {trust_pct}%*  \n{content}"
+            line = f"{emoji} <b>{title}</b>\n<i>Source: {source}, Trust: {trust_pct}%</i>\n{content}"
         lines.append(line)
         lines.append("")
     return "\n".join(lines)

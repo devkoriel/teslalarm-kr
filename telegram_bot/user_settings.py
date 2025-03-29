@@ -7,10 +7,7 @@ def get_db_connection():
     return psycopg2.connect(DATABASE_URL)
 
 
-def set_user_language(user_id, lang_code):
-    """
-    사용자 ID별 선호 언어('ko' 또는 'en')를 데이터베이스에 저장.
-    """
+def initialize_table():
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute(
@@ -21,6 +18,15 @@ def set_user_language(user_id, lang_code):
         );
     """
     )
+    conn.commit()
+    cur.close()
+    conn.close()
+
+
+def set_user_language(user_id, lang_code):
+    initialize_table()
+    conn = get_db_connection()
+    cur = conn.cursor()
     cur.execute(
         """
         INSERT INTO user_settings (user_id, preferred_lang)
@@ -36,9 +42,7 @@ def set_user_language(user_id, lang_code):
 
 
 def get_user_language(user_id):
-    """
-    사용자 ID에 대해 저장된 선호 언어를 조회. 저장된 값이 없으면 기본 'ko'를 반환.
-    """
+    initialize_table()
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("SELECT preferred_lang FROM user_settings WHERE user_id = %s;", (user_id,))
@@ -46,3 +50,7 @@ def get_user_language(user_id):
     cur.close()
     conn.close()
     return result[0] if result else "ko"
+
+
+def get_default_language():
+    return "ko"

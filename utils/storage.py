@@ -9,11 +9,7 @@ def get_db_connection():
     return psycopg2.connect(DATABASE_URL)
 
 
-def save_article(article):
-    """
-    기사를 PostgreSQL의 articles 테이블에 저장.
-    article: dict {source, title, content, url, published}
-    """
+def save_article(article: dict):
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute(
@@ -29,7 +25,7 @@ def save_article(article):
         );
     """
     )
-    content_hash = hashlib.sha1(article.get("content", "").encode("utf-8")).hexdigest()
+    article_hash = hashlib.sha256(article.get("content", "").encode("utf-8")).hexdigest()
     cur.execute(
         """
         INSERT INTO articles (source, title, content, url, published, hash)
@@ -42,7 +38,7 @@ def save_article(article):
             article.get("content"),
             article.get("url"),
             article.get("published", ""),
-            content_hash,
+            article_hash,
         ),
     )
     conn.commit()
@@ -50,11 +46,7 @@ def save_article(article):
     conn.close()
 
 
-def save_event(event):
-    """
-    이벤트를 PostgreSQL의 events 테이블에 저장.
-    event: dict {type, model, details, source, url, confidence}
-    """
+def save_event(event: dict):
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute(
