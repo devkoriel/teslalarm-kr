@@ -1,3 +1,4 @@
+# File: telegram_bot/message_formatter.py
 from datetime import datetime
 
 # 미리 정의된 카테고리별 헤더, 이모지, 그리고 각 뉴스 항목에서 추출해야 할 필드의 라벨 매핑
@@ -255,15 +256,21 @@ CATEGORY_FIELD_INFO = {
 }
 
 
-def format_detailed_message(news_categories: dict, news_type: str, language="ko") -> dict:
+def format_detailed_message(news_categories: dict, news_type: str, language="ko", url_mapping: dict = None) -> dict:
     """
-    news_categories: 분석 및 필드 추출 결과 JSON. 각 키는 카테고리명, 값은 뉴스 항목 리스트 (각 항목은 dict).
-    news_type: "domestic" 또는 "overseas" – 메시지 헤더에 표시 (예: [국내] 또는 [해외])
+    news_categories: OpenAI 분석 및 필드 추출 결과 JSON. 각 키는 카테고리명, 값은 뉴스 항목 리스트 (각 항목은 dict).
+    news_type: "domestic" 또는 "overseas"
     language: 'ko' 또는 'en'
+    url_mapping: 뉴스 제목을 key로 하고 해당 뉴스에 인용된 기사 리스트(각 항목은 dict {"title": ..., "url": ...} 또는 문자열)를 value로 가지는 딕셔너리.
 
-    각 카테고리별로, 각 뉴스 항목의 세부 정보를 (필드명, 값) 형식으로 예쁘게 포맷한 메시지를 생성합니다.
-    미리 정의된 카테고리 외의 키는 무시합니다.
-    반환형은 {카테고리: 메시지 문자열} 입니다.
+    각 뉴스 항목은 아래 순서로 HTML 메시지 문자열로 포맷됨:
+      1. 헤더: 대표 인용 기사 3개 중 최소 1개 링크를 포함한 제목 (클릭 가능)
+      2. 세부사항 (항목 앞에 빈 줄 포함, 각 필드 별로 새 줄)
+      3. 뉴스 게시일 (2줄 개행)
+      4. 신뢰도 및 신뢰도 판단 기준 (2줄 개행)
+      5. 인용 기사: 추가 인용 기사(최대 2개)를 제목에 링크걸어 함께 표시 (있을 경우)
+
+    반환형: {카테고리: 메시지 문자열}
     """
     messages = {}
     for cat_key, news_list in news_categories.items():
@@ -272,43 +279,105 @@ def format_detailed_message(news_categories: dict, news_type: str, language="ko"
         info = CATEGORY_FIELD_INFO[cat_key]
         cat_messages = []
         for item in news_list:
-            # 'published'가 있으면 사용, 없으면 현재 시간을 사용
-            published = item.get("published", "")
+            # 뉴스 게시일 처리
+            published = item.get("published", "").strip()
             if not published:
                 published = (
                     datetime.now().strftime("%Y년 %m월 %d일 %H:%M")
                     if language == "ko"
                     else datetime.now().strftime("%B %d, %Y %H:%M")
                 )
-            else:
-                published = published.strip()
-            # 신뢰도: 숫자형이면 백분율 변환, 아니면 문자열로 변환
+            # 신뢰도 처리
             trust = item.get("trust", "")
             if isinstance(trust, (int, float)):
                 trust = f"{int(trust * 100)}%"
             else:
-                trust = str(trust)
-            trust_reason = item.get("trust_reason", "")
-            lines = []
-            # 헤더: 이모지와 뉴스 타입, 카테고리명, 발행 일시 포함
-            header = f"{
-                info['emoji']} <b>[{
-                '국내' if news_type == 'domestic' else '해외'}] {
-                info['display']} 뉴스 ({published})</b>"
-            lines.append(header)
-            # 각 필드별로 내용 추가 (trust, trust_reason, published는 따로 처리)
+                trust = str(trust).strip()
+            trust_reason = item.get("trust_reason", "").strip()
+            title = item.get("title", "").strip()
+
+            # 인용 기사 처리:
+            # 우선, item에 "urls" 필드가 있다면 이를 사용 (신뢰도 높은 순서대로의 URL 문자열 리스트)
+            citations = []
+            if "urls" in item and isinstance(item["urls"], list) and item["urls"]:
+                citations = [{"url": url, "title": "인용 기사"} for url in item["urls"]]
+            # 만약 "urls" 필드가 없거나 비어 있다면 url_mapping을 활용
+            elif url_mapping:
+                for key, value in url_mapping.items():
+                    if key.lower() == title.lower():
+                        citations = value
+                        break
+                if not citations:
+                    for key, value in url_mapping.items():
+                        if key.lower() in title.lower() or title.lower() in key.lower():
+                            citations = value
+                            break
+                if citations:
+                    if isinstance(citations, str):
+                        citations = [{"url": citations, "title": title}]
+                    elif isinstance(citations, list):
+                        new_citations = []
+                        for cit in citations:
+                            if isinstance(cit, str):
+                                new_citations.append({"url": cit, "title": "기사"})
+                            elif isinstance(cit, dict):
+                                new_citations.append({"url": cit.get("url", "#"), "title": cit.get("title", "기사")})
+                        citations = new_citations
+
+            # 만약 위의 두 방법 모두 실패하면, 기본적으로 item의 url을 사용
+            if not citations:
+                citations = [{"url": item.get("url", "#"), "title": "기사"}]
+
+            # 대표 인용 기사 링크: 첫 번째 인용 기사 링크
+            citation_header_link = (
+                citations[0]["url"]
+                if citations and isinstance(citations[0], dict) and "url" in citations[0]
+                else item.get("url", "#")
+            )
+            # 추가 인용 기사: 최대 2개 (2번째와 3번째 항목)
+            additional_citations = []
+            if citations and len(citations) > 1:
+                for cit in citations[1:3]:
+                    link_cit = cit.get("url", "#") if isinstance(cit, dict) else cit
+                    title_cit = cit.get("title", "기사") if isinstance(cit, dict) else "기사"
+                    additional_citations.append(f"<a href='{link_cit}'>{title_cit}</a>")
+
+            # 메시지 구성
+            # 1. 헤더: 대표 인용 기사 링크를 포함한 제목 (클릭 가능)
+            header = f"{info['emoji']} <a href='{citation_header_link}'><b>[{'국내' if news_type=='domestic' else '해외'}] {info['display']} 뉴스 - {title}</b></a>"
+
+            # 2. 세부사항: 각 필드별로, 세부사항 앞에 빈 줄 추가 (각 줄 별로 새 줄)
+            detail_lines = []
             for field_key, label in info["fields"].items():
                 if field_key in ["trust", "trust_reason", "published"]:
                     continue
                 value = item.get(field_key, "").strip()
                 if value:
-                    lines.append(f"{label}: {value}")
-            # 신뢰도와 뉴스 게시일 및 신뢰도 판단 기준 추가
-            lines.append(f"{info['fields'].get('published', '뉴스 게시일')}: {published}")
-            lines.append(f"{info['fields'].get('trust', '신뢰도')}: {trust}")
-            lines.append(f"{info['fields'].get('trust_reason', '신뢰도 판단 기준')}: {trust_reason}")
-            lines.append("")  # 항목 구분을 위한 빈 줄
-            cat_messages.append("\n".join(lines))
-        # 카테고리별 전체 메시지: 각 뉴스 항목 메시지를 합침
-        messages[cat_key] = "\n".join(cat_messages)
+                    detail_lines.append(f"\n<b>{label}:</b> {value}")
+            details = "\n" + "\n".join(detail_lines) if detail_lines else ""
+
+            # 3. 뉴스 게시일 (2줄 개행)
+            published_line = f"<b>뉴스 게시일:</b> {published}"
+
+            # 4. 신뢰도 및 신뢰도 판단 기준 (2줄 개행)
+            trust_line = f"<b>신뢰도:</b> {trust}\n<b>신뢰도 판단 기준:</b> {trust_reason}"
+
+            # 5. 인용 기사 (추가 인용 기사, 최대 2개) – 제목에 링크 걸어 함께 표시
+            citation_lines = ""
+            if additional_citations:
+                citation_lines = "<b>인용 기사:</b> " + " | ".join(additional_citations)
+
+            # 최종 메시지 구성: 각 구분마다 2줄 개행(\n\n) 적용
+            full_message = (
+                header
+                + details
+                + "\n\n"
+                + published_line
+                + "\n\n"
+                + trust_line
+                + "\n\n"
+                + (citation_lines if citation_lines else "")
+            )
+            cat_messages.append(full_message)
+        messages[cat_key] = "\n\n".join(cat_messages)
     return messages

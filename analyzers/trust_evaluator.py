@@ -38,30 +38,30 @@ async def analyze_and_extract_fields(consolidated_text: str, language: str = "ko
         "22. 경제·금융 및 산업 분석: 'analysis_details', 'published', 'trust', 'trust_reason'\n\n"
         "출력은 반드시 아래 JSON 형식으로 해줘 (미리 정의된 카테고리에 속하지 않는 뉴스는 출력하지 말아줘):\n"
         "{\n"
-        '  "model_price_up": [ { "title": "...", "price": "...", "change": "...", "details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
-        '  "model_price_down": [ { "title": "...", "price": "...", "change": "...", "details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
-        '  "new_model": [ { "title": "...", "model_name": "...", "release_date": "...", "details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
-        '  "autonomous_update": [ { "title": "...", "feature": "...", "update_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
-        '  "software_update": [ { "title": "...", "update_title": "...", "update_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
-        '  "infrastructure_update": [ { "title": "...", "infrastructure_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
-        '  "battery_update": [ { "title": "...", "battery_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
-        '  "policy_update": [ { "title": "...", "policy_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
-        '  "production_update": [ { "title": "...", "production_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
-        '  "stock_update": [ { "title": "...", "stock_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
-        '  "ceo_statement": [ { "title": "...", "statement_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
-        '  "global_trend": [ { "title": "...", "trend_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
-        '  "service_update": [ { "title": "...", "service_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
-        '  "legal_update": [ { "title": "...", "legal_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
-        '  "event_update": [ { "title": "...", "event_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
-        '  "security_update": [ { "title": "...", "security_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
-        '  "comparison_update": [ { "title": "...", "comparison_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
-        '  "mobility_update": [ { "title": "...", "mobility_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
-        '  "marketing_update": [ { "title": "...", "marketing_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
-        '  "strategy_update": [ { "title": "...", "strategy_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
-        '  "community_update": [ { "title": "...", "community_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ],\n'
-        '  "analysis_update": [ { "title": "...", "analysis_details": "...", "published": "...", "trust": 0.0, "trust_reason": "..." }, ... ]\n'
+        '  "model_price_up": [ { "title": "...", "price": "...", "change": "...", "details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
+        '  "model_price_down": [ { "title": "...", "price": "...", "change": "...", "details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
+        '  "new_model": [ { "title": "...", "model_name": "...", "release_date": "...", "details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
+        '  "autonomous_update": [ { "title": "...", "feature": "...", "update_details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
+        '  "software_update": [ { "title": "...", "update_title": "...", "update_details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
+        '  "infrastructure_update": [ { "title": "...", "infrastructure_details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
+        '  "battery_update": [ { "title": "...", "battery_details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
+        '  "policy_update": [ { "title": "...", "policy_details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
+        '  "production_update": [ { "title": "...", "production_details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
+        '  "stock_update": [ { "title": "...", "stock_details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
+        '  "ceo_statement": [ { "title": "...", "statement_details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
+        '  "global_trend": [ { "title": "...", "trend_details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
+        '  "service_update": [ { "title": "...", "service_details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
+        '  "legal_update": [ { "title": "...", "legal_details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
+        '  "event_update": [ { "title": "...", "event_details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
+        '  "security_update": [ { "title": "...", "security_details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
+        '  "comparison_update": [ { "title": "...", "comparison_details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
+        '  "mobility_update": [ { "title": "...", "mobility_details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
+        '  "marketing_update": [ { "title": "...", "marketing_details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
+        '  "strategy_update": [ { "title": "...", "strategy_details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
+        '  "community_update": [ { "title": "...", "community_details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
+        '  "analysis_update": [ { "title": "...", "analysis_details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ]\n'
         "}\n\n"
-        "※ 모든 뉴스 항목은 한국 시장에 국한된 Tesla 관련 뉴스여야 하며, 차량 가격 관련 카테고리의 details는 반드시 가능하면 그 모델의 트림별 가격 정보를 반드시 포함해야해. 각 뉴스의 발행 일시는 '%Y년 %m월 %d일 %H:%M' 형식으로 작성해줘.\n\n"
+        "※ 모든 뉴스 항목은 한국 시장과 한국에 국한된 Tesla 관련 뉴스여야 하며, 차량 가격 관련 카테고리의 details는 반드시 가능하면 그 모델의 트림별 가격 정보를 반드시 포함해야해. new_model 뉴스의 release_date는 새로운 모델의 출시일이야. 각 뉴스의 발행 일시는 표준대로 '%Y년 %m월 %d일 %H:%M' 형식으로 작성해줘. 각 카테고리들의 뉴스들의 각 urls 필드는 각 카테고리의 뉴스들을 분류할 때 사용된 관련 URL 목록으로, 정리된 소식에 반드시 직접적 100% 관련이 있고 신뢰도 높은 순서대로 3개를 포함해야 해. 언어는 {language}으로 작성해.\n\n"
         "기사 텍스트:\n" + consolidated_text
     )
     response = openai.chat.completions.create(
