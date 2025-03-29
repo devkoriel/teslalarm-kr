@@ -1,11 +1,20 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from telegram_bot.user_settings import set_user_keywords, set_user_language
+from config import BOT_ADMIN_IDS
+from telegram_bot.message_sender import send_message_to_user
+from telegram_bot.user_settings import set_user_language
 
 
 async def change_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
+
+    # 관리자 여부 확인
+    if user_id not in BOT_ADMIN_IDS:
+        reply = "이 명령어를 사용할 권한이 없습니다."
+        await send_message_to_user(user_id, reply)
+        return
+
     if context.args:
         lang = context.args[0].lower()
         if lang in ["ko", "en"]:
@@ -15,24 +24,8 @@ async def change_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply = "지원하지 않는 언어입니다. 'ko' 또는 'en'을 사용하세요."
     else:
         reply = "사용법: /language <ko|en>"
-    from telegram_bot.message_sender import send_message_to_user
-
-    await send_message_to_user(user_id, reply)
-
-
-async def set_keywords(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    if context.args:
-        # 인자로 전달된 단어들을 키워드 리스트로 저장 (예: /keywords FSD 충전 배터리)
-        keywords = [arg.strip() for arg in context.args if arg.strip()]
-        set_user_keywords(user_id, keywords)
-        reply = f"관심 키워드가 {keywords}로 설정되었습니다."
-    else:
-        reply = "사용법: /keywords <키워드1> <키워드2> ..."
-    from telegram_bot.message_sender import send_message_to_user
-
     await send_message_to_user(user_id, reply)
 
 
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("명령어를 확인하세요. 예: /language ko, /keywords FSD 충전")
+    await update.message.reply_text("명령어를 확인하세요. 예: /language ko")
