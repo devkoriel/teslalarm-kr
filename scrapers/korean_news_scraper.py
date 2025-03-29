@@ -3,6 +3,10 @@ from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup
 
+from utils.logger import setup_logger
+
+logger = setup_logger()
+
 # 보다 현실적인 User-Agent를 사용하고 SSL 검증은 비활성화(verify=False)합니다.
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
@@ -41,7 +45,7 @@ def fetch_naver_news():
             )
         return items
     except Exception as e:
-        print("네이버 뉴스 수집 오류:", e)
+        logger.error(f"네이버 뉴스 수집 오류: {e}")
         return []
 
 
@@ -76,7 +80,7 @@ def fetch_motorgraph_news():
             )
         return items
     except Exception as e:
-        print("모터그래프 뉴스 수집 오류:", e)
+        logger.error(f"모터그래프 뉴스 수집 오류: {e}")
         return []
 
 
@@ -121,7 +125,7 @@ def fetch_auto_danawa_news():
             )
         return items
     except Exception as e:
-        print("AUTO.DANAWA 뉴스 수집 오류:", e)
+        logger.error(f"AUTO.DANAWA 뉴스 수집 오류: {e}")
         return []
 
 
@@ -160,7 +164,7 @@ def fetch_etnews_news():
             )
         return items
     except Exception as e:
-        print("전자신문 뉴스 수집 오류:", e)
+        logger.error(f"전자신문 뉴스 수집 오류: {e}")
         return []
 
 
@@ -196,7 +200,7 @@ def fetch_heraldcorp_news():
             )
         return items
     except Exception as e:
-        print("헤럴드경제 뉴스 수집 오류:", e)
+        logger.error(f"헤럴드경제 뉴스 수집 오류: {e}")
         return []
 
 
@@ -229,7 +233,7 @@ def fetch_donga_news():
             )
         return items
     except Exception as e:
-        print("동아닷컴 뉴스 수집 오류:", e)
+        logger.error(f"동아닷컴 뉴스 수집 오류: {e}")
         return []
 
 
@@ -267,7 +271,7 @@ def fetch_edaily_news():
             )
         return items
     except Exception as e:
-        print("이데일리 뉴스 수집 오류:", e)
+        logger.error(f"이데일리 뉴스 수집 오류: {e}")
         return []
 
 
@@ -303,7 +307,7 @@ def fetch_chosunbiz_news():
             )
         return items
     except Exception as e:
-        print("조선비즈 뉴스 수집 오류:", e)
+        logger.error(f"조선비즈 뉴스 수집 오류: {e}")
         return []
 
 
@@ -338,7 +342,7 @@ def fetch_autodaily_news():
             )
         return items
     except Exception as e:
-        print("오토데일리 뉴스 수집 오류:", e)
+        logger.error(f"오토데일리 뉴스 수집 오류: {e}")
         return []
 
 
@@ -373,5 +377,5 @@ def fetch_itchosun_news():
             )
         return items
     except Exception as e:
-        print("IT조선 뉴스 수집 오류:", e)
+        logger.error(f"IT조선 뉴스 수집 오류: {e}")
         return []
