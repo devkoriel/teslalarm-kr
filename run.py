@@ -29,6 +29,10 @@ async def process_news():
     domestic_clean = [n for n in domestic_news if not is_duplicate(n)]
     logger.info(f"중복 제거 후 뉴스 수: {len(domestic_clean)}")
 
+    if len(domestic_clean) == 0:
+        logger.info("처리할 뉴스가 없습니다.")
+        return
+
     # URL 매핑 생성: 제목별로 URL 모음
     url_mapping = build_url_mapping(domestic_clean)
     domestic_text = " ".join(
