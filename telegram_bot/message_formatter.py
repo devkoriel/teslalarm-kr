@@ -308,26 +308,41 @@ def format_detailed_message(news_categories: dict, news_type: str, language="ko"
                         new_citations = []
                         for cit in citations:
                             if isinstance(cit, str):
-                                new_citations.append({"url": cit, "title": "기사"})
+                                new_citations.append({"url": cit, "title": "인용 기사"})
                             elif isinstance(cit, dict):
-                                new_citations.append({"url": cit.get("url", "#"), "title": cit.get("title", "기사")})
+                                new_citations.append(
+                                    {"url": cit.get("url", "#"), "title": cit.get("title", "인용 기사")}
+                                )
                         citations = new_citations
 
             if not citations:
-                citations = [{"url": item.get("url", "#"), "title": "기사"}]
+                citations = [{"url": item.get("url", "#"), "title": "인용 기사"}]
 
             # 대표 인용 기사 링크 및 추가 인용 기사
-            citation_header_link = (
-                citations[0]["url"]
-                if citations and isinstance(citations[0], dict) and "url" in citations[0]
-                else item.get("url", "#")
-            )
+            if isinstance(citations, list) and len(citations) > 0:
+                first_cit = citations[0]
+                if isinstance(first_cit, dict) and "url" in first_cit:
+                    citation_header_link = first_cit["url"]
+                elif isinstance(first_cit, str):
+                    citation_header_link = first_cit
+                else:
+                    citation_header_link = item.get("url", "#")
+            else:
+                citation_header_link = item.get("url", "#")
+
             additional_citations = []
-            if citations and len(citations) > 1:
+            if isinstance(citations, list) and len(citations) > 1:
                 for cit in citations[1:3]:
-                    link_cit = cit.get("url", "#") if isinstance(cit, dict) else cit
-                    title_cit = cit.get("title", "기사") if isinstance(cit, dict) else "기사"
+                    if isinstance(cit, dict):
+                        link_cit = cit.get("url", "#")
+                        title_cit = cit.get("title", "인용 기사")
+                    elif isinstance(cit, str):
+                        link_cit = cit
+                        title_cit = "인용 기사"
+                    else:
+                        continue
                     additional_citations.append(f"<a href='{link_cit}'>{title_cit}</a>")
+
             # 헤더 구성
             header = f"{info['emoji']} <a href='{citation_header_link}'><b>[{'국내' if news_type=='domestic' else '해외'}] {info['display']} 뉴스 - {title}</b></a>"
             # 세부사항 구성
