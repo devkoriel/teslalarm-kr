@@ -1,8 +1,15 @@
 {
-    "extends": ["config:base"],
+    "extends": [
+        "config:recommended"
+    ],
     "timezone": "Asia/Seoul",
-    "schedule": ["after 22:00 every weekday", "before 05:00 every weekday"],
-    "labels": ["dependencies"],
+    "schedule": [
+        "after 22:00 every weekday",
+        "before 05:00 every weekday"
+    ],
+    "labels": [
+        "dependencies"
+    ],
     "dependencyDashboard": true,
     "lockFileMaintenance": {
         "enabled": true,
