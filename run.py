@@ -2,7 +2,7 @@ import asyncio
 
 from config import SCRAPE_INTERVAL
 from scrapers.data_fetcher import collect_domestic_news
-from telegram_bot.bot import create_application
+from telegram_bot.bot import create_application, run_webhook
 from telegram_bot.message_formatter import format_detailed_message
 from utils.cache import get_channel_messages, is_duplicate, store_channel_message
 from utils.logger import setup_logger
@@ -54,7 +54,7 @@ async def process_news():
     from analyzers.similarity_checker import check_similarity
     from telegram_bot.message_sender import send_message_to_channel
 
-    # stored_msgs가 존재하면 유사도 검사를 수행하고, 없으면 기본 결과 리스트를 생성
+    # 기존 메시지가 있는 경우에만 유사도 검사 수행
     if len(stored_msgs) > 0:
         similarity_results = await check_similarity(individual_messages, stored_msgs, language="ko")
     else:
@@ -81,7 +81,8 @@ def main():
     app = create_application()
     # SCRAPE_INTERVAL마다 process_news 작업 실행 (첫 실행은 10초 후)
     app.job_queue.run_repeating(lambda context: asyncio.create_task(process_news()), interval=SCRAPE_INTERVAL, first=10)
-    app.run_polling()
+    # Polling 대신 웹훅 방식으로 실행
+    run_webhook(app)
 
 
 if __name__ == "__main__":

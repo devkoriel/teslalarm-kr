@@ -15,8 +15,10 @@ SENTRY_DSN = os.getenv("SENTRY_DSN")
 SCRAPE_INTERVAL = int(os.getenv("SCRAPE_INTERVAL", 300))  # 기본 300초 (5분)
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-# 기본 언어 설정 (필요 시 관리자 명령어로 변경 가능)
 DEFAULT_LANGUAGE = "ko"  # "ko" 또는 "en"
-
-# 봇 관리자 ID 목록 (실제 관리자 ID로 변경)
 BOT_ADMIN_IDS = [7144670844]
+
+# 웹훅 관련 설정 (예: https://yourdomain.com/<bot_token>)
+WEBHOOK_URL = os.getenv("WEBHOOK_URL")  # 반드시 외부에서 접근 가능한 HTTPS URL로 설정
+WEBHOOK_PORT = int(os.getenv("WEBHOOK_PORT", 8080))
+WEBHOOK_LISTEN = os.getenv("WEBHOOK_LISTEN", "0.0.0.0")
