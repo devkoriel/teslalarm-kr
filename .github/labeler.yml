@@ -1,0 +1,12 @@
+# .github/labeler.yml
+# 예시: 파일 경로에 따라 'tests', 'database', 'telegram-bot' 등의 라벨을 자동 부여합니다.
+tests/**:
+    - tests
+database/**:
+    - database
+telegram_bot/**:
+    - telegram-bot
+scrapers/**:
+    - scraper
+utils/**:
+    - utils

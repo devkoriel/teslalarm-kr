@@ -1,0 +1,29 @@
+name: CodeQL
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+        # 모든 PR에 대해 실행
+        branches: [main]
+    schedule:
+        - cron: "0 3 * * 0" # 매주 일요일 03:00 UTC에 실행
+
+jobs:
+    analyze:
+        name: Analyze CodeQL
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Initialize CodeQL
+              uses: github/codeql-action/init@v2
+              with:
+                  languages: "python"
+
+            - name: Autobuild
+              uses: github/codeql-action/autobuild@v2
+
+            - name: Perform CodeQL Analysis
+              uses: github/codeql-action/analyze@v2
