@@ -3,7 +3,7 @@ version: "3.8"
 services:
     app:
         build: .
-        container_name: tesla_alert_bot_app
+        container_name: teslalarm-kr_app
         env_file: .env
         depends_on:
             - db
@@ -12,18 +12,18 @@ services:
 
     db:
         image: postgres:14
-        container_name: tesla_alert_bot_db
+        container_name: teslalarm-kr_db
         environment:
             POSTGRES_USER: myuser
             POSTGRES_PASSWORD: mypassword
-            POSTGRES_DB: tesla_db
+            POSTGRES_DB: teslalarm-kr_db
         volumes:
             - pgdata:/var/lib/postgresql/data
         restart: always
 
     redis:
         image: redis:6-alpine
-        container_name: tesla_alert_bot_redis
+        container_name: teslalarm-kr_redis
         volumes:
             - redisdata:/data
         restart: always

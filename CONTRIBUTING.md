@@ -1,6 +1,6 @@
-# Contributing to Tesla Alert Bot
+# Contributing to Teslalarm KR
 
-Thank you for your interest in contributing to Tesla Alert Bot! We welcome your contributions and suggestions.
+Thank you for your interest in contributing to Teslalarm KR! We welcome your contributions and suggestions.
 
 ## How to Contribute
 

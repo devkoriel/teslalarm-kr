@@ -1,13 +1,13 @@
 [tool.poetry]
-name = "tesla-alert-bot"
+name = "teslalarm-kr"
 version = "0.1.0"
 description = "A real-time Tesla news and price alert bot using Telegram."
 authors = ["Jinsoo Heo <dev.koriel@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/devkoriel/tesla_alert_bot"
-repository = "https://github.com/devkoriel/tesla_alert_bot"
-documentation = "https://github.com/devkoriel/tesla_alert_bot"
+homepage = "https://github.com/devkoriel/teslalarm-kr"
+repository = "https://github.com/devkoriel/teslalarm-kr"
+documentation = "https://github.com/devkoriel/teslalarm-kr"
 package-mode = false
 
 [tool.poetry.dependencies]

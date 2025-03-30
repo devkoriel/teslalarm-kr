@@ -1,6 +1,6 @@
-# Tesla Alert Bot
+# Teslalarm KR
 
-**Tesla Alert Bot** is an open–source real–time alert system for Tesla news. It scrapes Tesla–related articles from various reputable sources, analyzes news events with state–of–the–art natural language processing techniques, and sends notifications via Telegram.
+**Teslalarm KR** is an open–source real–time alert system for Tesla news. It scrapes Tesla–related articles from various reputable sources, analyzes news events with state–of–the–art natural language processing techniques, and sends notifications via Telegram.
 
 ## Features
 
@@ -24,8 +24,8 @@
 1. **Clone the repository:**
 
     ```bash
-    git clone https://github.com/devkoriel/tesla_alert_bot.git
-    cd tesla_alert_bot
+    git clone https://github.com/devkoriel/teslalarm-kr.git
+    cd teslalarm-kr
     ```
 
 2. **Install dependencies using Poetry:**
@@ -61,7 +61,7 @@ TELEGRAM_BOT_TOKEN=your-telegram-bot-token
 TELEGRAM_CHAT_ID=your-telegram-chat-id
 OPENAI_API_KEY=your-openai-api-key
 SCRAPE_INTERVAL=300
-DATABASE_URL=postgresql://myuser:mypassword@db:5432/tesla_db
+DATABASE_URL=postgresql://myuser:mypassword@db:5432/teslalarm-kr_db
 REDIS_URL=redis://redis:6379
 LOG_LEVEL=debug
 ```
