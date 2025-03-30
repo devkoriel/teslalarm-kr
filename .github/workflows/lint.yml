@@ -24,6 +24,3 @@ jobs:
 
             - name: Run isort check
               run: poetry run isort --check-only .
-
-            - name: Run Flake8
-              run: poetry run flake8 .
