@@ -1,0 +1,13 @@
+{
+    "extends": ["config:base"],
+    "timezone": "Asia/Seoul",
+    "schedule": ["after 22:00 every weekday", "before 05:00 every weekday"],
+    "labels": ["dependencies"],
+    "dependencyDashboard": true,
+    "lockFileMaintenance": {
+        "enabled": true,
+        "schedule": "every weekend"
+    },
+    "prCreation": "immediate",
+    "prConcurrentLimit": 5
+}
