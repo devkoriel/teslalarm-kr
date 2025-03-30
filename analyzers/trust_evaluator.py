@@ -1,6 +1,7 @@
 import json
 
 import openai
+import tiktoken
 
 from config import OPENAI_API_KEY
 from utils.logger import setup_logger
@@ -10,7 +11,20 @@ logger = setup_logger()
 openai.api_key = OPENAI_API_KEY
 
 
+def count_tokens(text: str, model: str = "o3") -> int:
+    """
+    tiktoken을 이용하여 텍스트의 토큰 수를 정확하게 계산합니다.
+    model에 따라 적절한 인코딩을 선택하며, 모델에 대한 인코딩 정보가 없으면 cl100k_base를 사용합니다.
+    """
+    try:
+        encoding = tiktoken.encoding_for_model(model)
+    except KeyError:
+        encoding = tiktoken.get_encoding("o200k_base")
+    return len(encoding.encode(text))
+
+
 async def analyze_and_extract_fields(consolidated_text: str, language: str = "ko") -> dict:
+    system_message = "너는 Tesla 뉴스 분석 전문가이자 카테고리 분류 도우미입니다."
     prompt = (
         "아래 Tesla 뉴스 기사를 분석하여, 미리 정의된 카테고리별로 여러 뉴스들을 중복 제거해서 분류하고, "
         "각 뉴스 항목에 대해 필요한 정보를 아래 필드로 정리해줘.\n\n"
@@ -61,16 +75,30 @@ async def analyze_and_extract_fields(consolidated_text: str, language: str = "ko
         '  "community_update": [ { "title": "...", "community_details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
         '  "analysis_update": [ { "title": "...", "analysis_details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ]\n'
         "}\n\n"
-        "※ 모든 뉴스 항목은 한국 시장과 한국에 국한된 Tesla 관련 뉴스여야 하며, 차량 가격 관련 카테고리의 details는 반드시 가능하면 그 모델의 트림별 가격 정보를 반드시 포함해야해. new_model 뉴스의 release_date는 새로운 모델의 출시일이야. 각 뉴스의 발행 일시는 표준대로 '%Y년 %m월 %d일 %H:%M' 형식으로 작성해줘. 각 카테고리들의 뉴스들의 각 urls 필드는 각 카테고리의 뉴스들을 분류할 때 사용된 관련 URL 목록으로, 정리된 소식에 반드시 직접적 100% 관련이 있고 신뢰도 높은 순서대로 서로 다른 3개를 포함해야 해. 언어는 {language}으로 작성해.\n\n"
+        "※ 모든 뉴스 항목은 한국 시장과 한국에 국한된 Tesla 관련 뉴스여야 하며, 차량 가격 관련 카테고리의 details는 반드시 가능하면 그 모델의 트림별 가격 정보를 반드시 포함해야해. new_model 뉴스의 release_date는 새로운 모델의 출시일이야. 각 뉴스의 발행 일시는 표준대로 '%Y년 %m월 %d일 %H:%M' 형식으로 작성해줘. 각 카테고리들의 뉴스들의 각 urls 필드는 각 카테고리의 뉴스들을 분류할 때 사용된 관련 URL 목록으로, 정리된 소식에 반드시 직접적 100% 관련이 있고 신뢰도 높은 순서대로 서로 다른 3개를 원본 URL 그대로 포함해야 해. 언어는 {language}으로 작성해.\n\n"
         "기사 텍스트:\n" + consolidated_text
     )
+
+    # 입력 메시지 토큰 수를 tiktoken을 사용해 정확하게 계산
+    system_token_count = count_tokens(system_message, model="o3")
+    prompt_token_count = count_tokens(prompt, model="o3")
+    input_token_count = system_token_count + prompt_token_count
+
+    max_context_tokens = 195_000
+    available_tokens = max_context_tokens - input_token_count
+    if available_tokens < 100:
+        available_tokens = 100
+
+    if available_tokens > 100_000:
+        available_tokens = 100_000
+
     response = openai.chat.completions.create(
         model="o3-mini",
         messages=[
-            {"role": "system", "content": "너는 Tesla 뉴스 분석 전문가이자 카테고리 분류 도우미입니다."},
+            {"role": "system", "content": system_message},
             {"role": "user", "content": prompt},
         ],
-        max_completion_tokens=10_000,
+        max_completion_tokens=available_tokens,
     )
     result_text = response.choices[0].message.content.strip()
     logger.info(f"OpenAI API 응답: {result_text}")

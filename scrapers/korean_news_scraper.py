@@ -59,7 +59,7 @@ def extract_article_content(html):
 def fetch_naver_news():
     try:
         # 예시: "테슬라" 검색 결과 페이지
-        url = "https://search.naver.com/search.naver?where=news&query=테슬라"
+        url = "https://search.naver.com/search.naver?where=news&query=%ED%85%8C%EC%8A%AC%EB%9D%BC"
         status, res_text = pycurl_get(url, headers=HEADERS, timeout=10)
         if status != 200:
             raise Exception("HTTP 오류: " + str(status))
@@ -357,7 +357,7 @@ def fetch_heraldcorp_news():
 def fetch_donga_news():
     try:
         # 동아닷컴 뉴스 목록 페이지 URL (필요에 따라 쿼리 파라미터를 조정하세요)
-        url = "https://www.donga.com/news/search?query=테슬라&check_news=91&sorting=1&search_date=1&v1=&v2=&more=1"
+        url = "https://www.donga.com/news/search?query=%ED%85%8C%EC%8A%AC%EB%9D%BC&check_news=91&sorting=1&search_date=1&v1=&v2=&more=1"
         status, res_text = pycurl_get(url, headers=HEADERS, timeout=10)
         if status != 200:
             raise Exception(f"HTTP status {status}")
@@ -482,7 +482,7 @@ def fetch_edaily_news():
 def fetch_chosunbiz_news():
     try:
         # 조선비즈 뉴스 목록 페이지 URL (필요에 따라 쿼리 파라미터를 조정)
-        url = "https://biz.chosun.com/nsearch/?query=테슬라&siteid=chosunbiz&website=chosunbiz&opt_chk=true"
+        url = "https://biz.chosun.com/nsearch/?query=%ED%85%8C%EC%8A%AC%EB%9D%BC&siteid=chosunbiz&website=chosunbiz&opt_chk=true"
         status, res_text = pycurl_get(url, headers=HEADERS, timeout=10)
         if status != 200:
             raise Exception(f"HTTP status {status}")
