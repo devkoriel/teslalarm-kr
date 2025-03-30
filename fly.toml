@@ -3,8 +3,8 @@
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'teslalarm'
-primary_region = 'nrt'
+app = "teslalarm"
+primary_region = "nrt"
 
 [build]
 
@@ -14,9 +14,9 @@ force_https = true
 auto_stop_machines = "off"
 auto_start_machines = true
 min_machines_running = 1
-processes = ['app']
+processes = ["app"]
 
 [[vm]]
-memory = '1gb'
-cpu_kind = 'shared'
+memory = "1gb"
+cpu_kind = "shared"
 cpus = 1
