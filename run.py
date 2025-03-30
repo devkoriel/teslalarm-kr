@@ -36,7 +36,7 @@ async def process_news():
     # URL 매핑 생성
     url_mapping = build_url_mapping(domestic_clean)
     domestic_text = " ".join(
-        f"제목: {n.get('title')} 내용: {n.get('content')} URL: {n.get('url')}" for n in domestic_clean
+        f"\n---\n제목: {n.get('title')} 내용: {n.get('content')} URL: {n.get('url')}\n---\n" for n in domestic_clean
     )
 
     # OpenAI를 통한 뉴스 분석 및 필드 추출
