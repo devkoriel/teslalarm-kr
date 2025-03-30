@@ -33,14 +33,14 @@ async def check_similarity(new_messages: list, stored_messages: list, language: 
       {"already_sent": Boolean, "max_similarity": Float}
     """
     system_message = "너는 메시지 유사도 분석 전문가입니다."
-    prompt += (
-        "\n각 새로운 메시지에 대해, 기존 메시지들 중 유사한 메시지가 있는지 판단하고 최대 유사도를 산출해주세요. "
+    prompt = (
+        "각 새로운 메시지에 대해, 기존 메시지들 중 유사한 메시지가 있는지 판단하고 최대 유사도를 산출해주세요. "
         "유사도가 80% 이상이면 해당 메시지는 이미 전송된 것으로 판단하여 already_sent를 true로, "
         "그렇지 않으면 false로 표시하고, 최대 유사도를 0과 1 사이의 실수로 산출해주세요. "
         "응답은 새로운 메시지들의 순서에 맞게 JSON 배열 형식으로 출력하며, 배열의 각 원소는 아래 형식이어야 합니다:\n"
         '{"already_sent": Boolean, "max_similarity": Float}\n'
     )
-    prompt = "다음은 새로운 메시지들의 목록입니다:\n"
+    prompt += "\n다음은 새로운 메시지들의 목록입니다:\n"
     for idx, msg in enumerate(new_messages, start=1):
         prompt += '{}. "{}"\n'.format(idx, msg)
     prompt += "\n다음은 기존에 전송된 메시지들의 목록입니다:\n"
