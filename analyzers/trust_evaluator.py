@@ -76,19 +76,31 @@ async def analyze_and_extract_fields(consolidated_text: str, language: str = "ko
         '  "analysis_update": [ { "title": "...", "analysis_details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ]\n'
         "}\n\n"
         "※ 모든 뉴스 항목은 한국 시장과 한국에 국한된 Tesla 관련 뉴스여야 하며, 차량 가격 관련 카테고리의 details는 반드시 가능하면 그 모델의 트림별 가격 정보를 반드시 포함해야해. new_model 뉴스의 release_date는 새로운 모델의 출시일이야. 각 뉴스의 발행 일시는 표준대로 '%Y년 %m월 %d일 %H:%M' 형식으로 작성해줘. 각 카테고리들의 뉴스들의 각 urls 필드는 각 카테고리의 뉴스들을 분류할 때 사용된 관련 URL 목록으로, 정리된 소식에 반드시 직접적 100% 관련이 있고 신뢰도 높은 순서대로 서로 다른 3개를 원본 URL 그대로 포함해야 해. 언어는 {language}으로 작성해.\n\n"
-        "기사 텍스트:\n" + consolidated_text
+        "기사 텍스트:\n"
     )
 
-    # 입력 메시지 토큰 수를 tiktoken을 사용해 정확하게 계산
+    # tiktoken을 사용해 정확하게 토큰 수 계산
     system_token_count = count_tokens(system_message, model="o3")
     prompt_token_count = count_tokens(prompt, model="o3")
-    input_token_count = system_token_count + prompt_token_count
+    consolidated_text_token_count = count_tokens(consolidated_text, model="o3")
+    total_input_tokens = system_token_count + prompt_token_count + consolidated_text_token_count
 
     max_context_tokens = 195_000
-    available_tokens = max_context_tokens - input_token_count
-    if available_tokens < 100:
-        available_tokens = 100
+    max_input_tokens = max_context_tokens - 10_000  # 최소 10,000 토큰 확보
+    if total_input_tokens > max_input_tokens:
+        # 허용 가능한 consolidated_text 토큰 수 계산
+        allowed_consolidated_tokens = max_input_tokens - (system_token_count + prompt_token_count)
+        try:
+            encoding = tiktoken.encoding_for_model("o3")
+        except KeyError:
+            encoding = tiktoken.get_encoding("o200k_base")
+        encoded_text = encoding.encode(consolidated_text)
+        trimmed_tokens = encoded_text[:allowed_consolidated_tokens]
+        consolidated_text = encoding.decode(trimmed_tokens)
+        consolidated_text_token_count = count_tokens(consolidated_text, model="o3")
+        total_input_tokens = system_token_count + prompt_token_count + consolidated_text_token_count
 
+    available_tokens = max_context_tokens - total_input_tokens
     if available_tokens > 100_000:
         available_tokens = 100_000
 
@@ -96,7 +108,7 @@ async def analyze_and_extract_fields(consolidated_text: str, language: str = "ko
         model="o3-mini",
         messages=[
             {"role": "system", "content": system_message},
-            {"role": "user", "content": prompt},
+            {"role": "user", "content": prompt + consolidated_text},
         ],
         max_completion_tokens=available_tokens,
     )
