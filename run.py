@@ -51,12 +51,14 @@ async def process_news():
     # Redis에 저장된 기존 채널 메시지 가져오기
     stored_msgs = get_channel_messages()
 
-    # 전체 new_messages를 한 번에 비교
     from analyzers.similarity_checker import check_similarity
-
-    similarity_results = await check_similarity(individual_messages, stored_msgs, language="ko")
-
     from telegram_bot.message_sender import send_message_to_channel
+
+    # stored_msgs가 존재하면 유사도 검사를 수행하고, 없으면 기본 결과 리스트를 생성
+    if len(stored_msgs) > 0:
+        similarity_results = await check_similarity(individual_messages, stored_msgs, language="ko")
+    else:
+        similarity_results = [{"already_sent": False, "max_similarity": 0.0} for _ in individual_messages]
 
     for idx, msg in enumerate(individual_messages):
         result = (
