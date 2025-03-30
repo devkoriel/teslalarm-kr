@@ -6,7 +6,6 @@ RUN apt-get update && apt-get install -y \
     git \
     libpq-dev \
     gcc \
-    gfortran \
     && rm -rf /var/lib/apt/lists/*
 
 ENV POETRY_VERSION=2.1.1
