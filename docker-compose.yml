@@ -12,11 +12,11 @@ services:
 
     db:
         image: postgres:14
-        container_name: teslalarm-kr_db
+        container_name: test_database
         environment:
             POSTGRES_USER: myuser
             POSTGRES_PASSWORD: mypassword
-            POSTGRES_DB: teslalarm-kr_db
+            POSTGRES_DB: test_database
         volumes:
             - pgdata:/var/lib/postgresql/data
         restart: always

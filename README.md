@@ -61,7 +61,7 @@ TELEGRAM_BOT_TOKEN=your-telegram-bot-token
 TELEGRAM_CHAT_ID=your-telegram-chat-id
 OPENAI_API_KEY=your-openai-api-key
 SCRAPE_INTERVAL=300
-DATABASE_URL=postgresql://myuser:mypassword@db:5432/teslalarm-kr_db
+DATABASE_URL=postgresql://myuser:mypassword@db:5432/test_database
 REDIS_URL=redis://redis:6379
 LOG_LEVEL=debug
 ```
