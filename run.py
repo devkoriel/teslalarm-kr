@@ -4,7 +4,7 @@ from config import SCRAPE_INTERVAL
 from scrapers.data_fetcher import collect_domestic_news
 from telegram_bot.bot import create_application
 from telegram_bot.message_formatter import format_detailed_message
-from utils.cache import is_duplicate
+from utils.cache import get_channel_messages, is_duplicate, store_channel_message
 from utils.logger import setup_logger
 
 logger = setup_logger()
@@ -33,7 +33,7 @@ async def process_news():
         logger.info("처리할 뉴스가 없습니다.")
         return
 
-    # URL 매핑 생성: 제목별로 URL 모음
+    # URL 매핑 생성
     url_mapping = build_url_mapping(domestic_clean)
     domestic_text = " ".join(
         f"제목: {n.get('title')} 내용: {n.get('content')} URL: {n.get('url')}" for n in domestic_clean
@@ -48,13 +48,27 @@ async def process_news():
     # 각 뉴스 항목을 개별 메시지로 포맷 (리스트 형태)
     individual_messages = format_detailed_message(domestic_result, "domestic", language="ko", url_mapping=url_mapping)
 
-    # 채널로 각 뉴스 항목을 개별적으로 전송
+    # Redis에 저장된 기존 채널 메시지 가져오기
+    stored_msgs = get_channel_messages()
+
+    # 전체 new_messages를 한 번에 비교
+    from analyzers.similarity_checker import check_similarity
+
+    similarity_results = await check_similarity(individual_messages, stored_msgs, language="ko")
+
     from telegram_bot.message_sender import send_message_to_channel
 
-    for msg in individual_messages:
+    for idx, msg in enumerate(individual_messages):
+        result = (
+            similarity_results[idx] if idx < len(similarity_results) else {"already_sent": False, "max_similarity": 0.0}
+        )
+        if result.get("already_sent") and result.get("max_similarity", 0) >= 0.8:
+            logger.info("유사한 메시지가 이미 전송되어 스킵합니다.")
+            continue
         try:
             await send_message_to_channel(msg)
             logger.info("개별 뉴스 메시지 전송 완료")
+            store_channel_message(msg)
         except Exception as e:
             logger.error(f"채널 메시지 전송 오류: {e}")
 

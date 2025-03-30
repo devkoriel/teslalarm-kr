@@ -14,7 +14,7 @@ openai.api_key = OPENAI_API_KEY
 def count_tokens(text: str, model: str = "o3") -> int:
     """
     tiktoken을 이용하여 텍스트의 토큰 수를 정확하게 계산합니다.
-    model에 따라 적절한 인코딩을 선택하며, 모델에 대한 인코딩 정보가 없으면 cl100k_base를 사용합니다.
+    model에 따라 적절한 인코딩을 선택하며, 모델에 대한 인코딩 정보가 없으면 o200k_base를 사용합니다.
     """
     try:
         encoding = tiktoken.encoding_for_model(model)
