@@ -1,5 +1,7 @@
 # Teslalarm KR
 
+[![codecov](https://codecov.io/gh/devkoriel/teslalarm-kr/graph/badge.svg?token=I08064ZBM8)](https://codecov.io/gh/devkoriel/teslalarm-kr)
+
 **Teslalarm KR** is an open–source real–time alert system for Tesla news. It scrapes Tesla–related articles from various reputable sources, analyzes news events with state–of–the–art natural language processing techniques, and sends notifications via Telegram.
 
 ## Features
