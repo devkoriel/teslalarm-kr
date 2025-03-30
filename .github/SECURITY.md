@@ -2,7 +2,7 @@
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in Teslalarm KR, please email [your-email@example.com] with a detailed description of the issue. Do not create a public issue for security concerns.
+If you discover a security vulnerability in Teslalarm KR, please email [dev.koriel@gmail.com] with a detailed description of the issue. Do not create a public issue for security concerns.
 
 ## Security Updates
 
