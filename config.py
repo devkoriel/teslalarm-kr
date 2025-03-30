@@ -7,9 +7,9 @@ load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 try:
-    TELEGRAM_GROUP_ID = int(os.getenv("TELEGRAM_GROUP_ID"))
+    TELEGRAM_CHAT_ID = int(os.getenv("TELEGRAM_CHAT_ID"))
 except (TypeError, ValueError):
-    TELEGRAM_GROUP_ID = None
+    TELEGRAM_CHAT_ID = None
 REDIS_URL = os.getenv("REDIS_URL")
 SENTRY_DSN = os.getenv("SENTRY_DSN")
 SCRAPE_INTERVAL = int(os.getenv("SCRAPE_INTERVAL", 300))  # 기본 300초 (5분)

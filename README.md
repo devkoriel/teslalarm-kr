@@ -21,7 +21,7 @@ Tesla Alert Bot is an open-source system that scrapes Tesla official news and re
 Set the following environment variables in your Heroku Config Vars or local environment:
 
 -   `TELEGRAM_BOT_TOKEN`
--   `TELEGRAM_GROUP_ID`
+-   `TELEGRAM_CHAT_ID`
 -   `SCRAPE_INTERVAL` (in seconds; default is 300)
 -   `DATABASE_URL` (PostgreSQL connection URL, e.g., postgres://user:pass@host:port/dbname)
 -   `REDIS_URL` (Redis connection URL, e.g., redis://host:port)
