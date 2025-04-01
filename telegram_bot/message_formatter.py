@@ -262,6 +262,7 @@ CATEGORY_FIELD_INFO = {
             "city": "시/군/구",
             "expected_price": "예상 구매가",
             "subsidy_details": "보조금 세부사항",
+            "published": "게시일",
         },
     },
     "tesla_good_tips": {
