@@ -45,7 +45,7 @@ async def analyze_and_extract_fields(consolidated_text: str, language: str = "ko
         "20. 테슬라 인수합병 및 기업 전략: 'strategy_details', 'published', 'trust', 'trust_reason'\n"
         "21. 테슬라 팬 커뮤니티 및 소셜 미디어 트렌드: 'community_details', 'published', 'trust', 'trust_reason'\n"
         "22. 경제·금융 및 산업 분석: 'analysis_details', 'published', 'trust', 'trust_reason'\n"
-        "23. 테슬라 구매 보조금 정보: 'year', 'model', 'area', 'city', 'expected_price', 'subsidy_details'\n"
+        "23. 테슬라 구매 보조금 정보: 'year', 'model', 'area', 'city', 'expected_price', 'subsidy_details', 'published'\n"
         "24. 테슬라 꿀팁: 'tip_details', 'published'\n"
         "출력은 반드시 아래 JSON 형식으로만 해줘 (미리 정의된 카테고리에 속하지 않는 뉴스나 정보성 글은 출력하지 말아줘):\n"
         "{\n"
@@ -76,6 +76,10 @@ async def analyze_and_extract_fields(consolidated_text: str, language: str = "ko
         "}\n\n"
         "※ 모든 뉴스 항목은 한국 시장과 한국에 국한된 Tesla 관련 뉴스여야 하며, 차량 가격 관련 카테고리의 details는 반드시 가능하면 그 모델의 트림별 가격 정보를 반드시 포함해야해. new_model 뉴스의 release_date는 새로운 모델의 출시일이야. 각 뉴스의 발행 일시는 반드시 '%Y년 %m월 %d일 %H:%M' 형식으로 작성해줘. 각 카테고리의 urls 필드는 해당 뉴스나 정보성 글과 직접적으로 100% 관련되고 신뢰도 높은 순서대로, 가능한 서로 다른 최대 3개의 원본 URL을 포함해야 해.\n\n"
         "※ 테슬라 구매 보조금 정보와 테슬라 꿀팁은 뉴스가 아닌 정보성 글이야.\n\n"
+        '※ subsidy_info[].subsidy_details는 모두 다 무조건 "서울 외 지역의 자세한 보조금 정보는 링크를 눌러 확인하세요."로 고정해.\n\n'
+        '※ subsidy_info[].year 뒤에는 반드시 "년"을 붙여줘.\n\n'
+        '※ subsidy_info[].expected_price 뒤에는 반드시 "만원"을 붙여줘. 그리고 1,000 단위로 ,를 넣어줘.\n\n'
+        "※ 테슬라 꿀팁은 구매와 할인, 보조금, 레퍼럴, 제품, 용품 등 테슬라 차주들이 관심있을만한 내용만 남겨.\n\n"
         "언어는 {language}으로 작성해.\n\n"
         "기사 텍스트:\n"
     )

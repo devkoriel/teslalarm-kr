@@ -233,11 +233,9 @@ def fetch_tesla_good_tips():
         for blog_item in blog_items:
             try:
                 # 제목에는 <b> 태그 등이 포함되어 있으므로 BeautifulSoup으로 정리
-                title_raw = blog_item.get("title", "")
-                title = BeautifulSoup(title_raw, "html.parser").get_text(strip=True)
+                title = blog_item.get("title", "")
                 post_url = blog_item.get("link", "")
-                description_raw = blog_item.get("description", "")
-                description = BeautifulSoup(description_raw, "html.parser").get_text(strip=True)
+                description = blog_item.get("description", "")
                 postdate = blog_item.get("postdate", "")
                 # postdate가 YYYYMMDD 형식이면 "YYYY.MM.DD"로 포맷팅
                 if len(postdate) == 8:
@@ -246,7 +244,7 @@ def fetch_tesla_good_tips():
                     formatted_date = postdate
 
                 item = {
-                    "title": title,
+                    "title": "테슬라 꿀팁" + title,
                     "url": post_url,
                     "published": formatted_date,
                     "content": description,
