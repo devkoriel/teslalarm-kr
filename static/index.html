@@ -1,0 +1,59 @@
+<!-- File: static/index.html -->
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8" />
+        <title>테스알림 Korea 🇰🇷</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <!-- External libraries -->
+        <script
+            src="https://unpkg.com/react@18/umd/react.development.js"
+            crossorigin
+        ></script>
+        <script
+            src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"
+            crossorigin
+        ></script>
+        <script
+            src="https://unpkg.com/@chakra-ui/react@2.5.0/dist/chakra-ui-react.umd.min.js"
+            crossorigin
+        ></script>
+        <script
+            src="https://unpkg.com/@emotion/react@11.9.3/dist/emotion-react.umd.min.js"
+            crossorigin
+        ></script>
+        <script
+            src="https://unpkg.com/@emotion/styled@11.9.3/dist/emotion-styled.umd.min.js"
+            crossorigin
+        ></script>
+        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+        <script src="https://unpkg.com/three@0.154.0/build/three.min.js"></script>
+        <style>
+            html,
+            body,
+            #root {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+                overflow: hidden;
+                background-color: #d32f2f; /* Tesla-like red background */
+                font-family: sans-serif;
+            }
+            /* Full-screen canvas for the Three.js animation */
+            #animation-canvas {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: -1;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="animation-canvas"></canvas>
+        <div id="root"></div>
+        <!-- Load the external JavaScript file that contains our React and Three.js code -->
+        <script type="text/babel" src="/static/app.js"></script>
+    </body>
+</html>
