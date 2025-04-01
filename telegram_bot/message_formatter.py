@@ -361,7 +361,7 @@ def format_detailed_message(news_categories: dict, news_type: str, language="ko"
                 if value:
                     detail_lines.append(f"\n<b>{label}:</b> {value}")
             details = "\n" + "\n".join(detail_lines) if detail_lines else ""
-            published_line = f"<b>뉴스 게시일:</b> {published}"
+            published_line = f"<b>게시일:</b> {published}"
             trust_line = f"<b>신뢰도:</b> {trust}\n<b>신뢰도 판단 기준:</b> {trust_reason}"
             citation_lines = ""
             if additional_citations:
