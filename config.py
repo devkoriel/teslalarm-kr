@@ -12,7 +12,7 @@ except (TypeError, ValueError):
     TELEGRAM_CHAT_ID = None
 REDIS_URL = os.getenv("REDIS_URL")
 SENTRY_DSN = os.getenv("SENTRY_DSN")
-SCRAPE_INTERVAL = int(os.getenv("SCRAPE_INTERVAL", 300))  # 기본 300초 (5분)
+SCRAPE_INTERVAL = int(os.getenv("SCRAPE_INTERVAL", 1800))  # 기본 1800초 (30분)
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 DEFAULT_LANGUAGE = "ko"  # "ko" 또는 "en"
