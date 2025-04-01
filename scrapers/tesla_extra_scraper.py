@@ -218,7 +218,7 @@ def fetch_tesla_naver_blog():
         try:
             # OpenAPI 호출 URL (검색어는 URL 인코딩 처리)
             search_query = quote("테슬라")
-            url = f"https://openapi.naver.com/v1/search/blog?query={search_query}&display=100&start=1&sort=sim"
+            url = f"https://openapi.naver.com/v1/search/blog?query={search_query}&display=30&start=1&sort=sim"
             status, res_text = pycurl_get(url, headers=NAVER_BLOG_HEADERS, timeout=10)
             if status != 200:
                 raise Exception(f"HTTP status {status}")

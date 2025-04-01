@@ -47,7 +47,7 @@ async def analyze_and_extract_fields(consolidated_text: str, language: str = "ko
         "22. 경제·금융 및 산업 분석: 'analysis_details', 'published', 'trust', 'trust_reason'\n"
         "23. 테슬라 구매 보조금 정보: 'year', 'model', 'area', 'city', 'expected_price', 'subsidy_details', 'published'\n"
         "24. 테슬라 유용한 정보: 'useful_info_details', 'published'\n\n"
-        "응답은 JSON parser로 바로 parsing 할 수 있도록 반드시 아래 JSON 형식으로 해줘 (미리 정의된 카테고리에 속하지 않는 뉴스나 정보성 글은 포함하지 말아줘):\n"
+        "응답은 JSON parser로 바로 parsing 할 수 있도록 반드시 아래 JSON 형식으로 해 (미리 정의된 카테고리에 속하지 않는 뉴스나 정보성 글은 포함하지마):\n"
         "{\n"
         '  "model_price_up": [ { "title": "...", "price": "...", "change": "...", "details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
         '  "model_price_down": [ { "title": "...", "price": "...", "change": "...", "details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'

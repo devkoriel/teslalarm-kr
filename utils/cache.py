@@ -30,11 +30,11 @@ def is_duplicate(news_item: dict, expire_seconds: int = 86400) -> bool:
 def store_channel_message(message: str):
     """
     텔레그램 채널로 전송된 메시지를 Redis에 순서대로 저장합니다.
-    최신 메시지 100개만 유지합니다.
+    최신 메시지 300개만 유지합니다.
     """
     r.rpush("channel:messages", message)
-    # 마지막 100개만 남김 (오래된 항목부터 제거)
-    r.ltrim("channel:messages", -100, -1)
+    # 마지막 300개만 남김 (오래된 항목부터 제거)
+    r.ltrim("channel:messages", -300, -1)
 
 
 def get_channel_messages() -> list:
