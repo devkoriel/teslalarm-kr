@@ -12,7 +12,9 @@ from scrapers.korean_news_scraper import (
 )
 from scrapers.tesla_extra_scraper import (
     fetch_subsidy_info,
-    fetch_tesla_good_tips,
+    fetch_tesla_clien,
+    fetch_tesla_dcincide,
+    fetch_tesla_naver_blog,
 )
 from utils.logger import setup_logger
 
@@ -66,7 +68,15 @@ def collect_domestic_news():
     except Exception as e:
         logger.error(f"보조금 정보 수집 오류: {e}")
     try:
-        news += fetch_tesla_good_tips()
+        news += fetch_tesla_naver_blog()
     except Exception as e:
-        logger.error(f"테슬라 꿀팁 수집 오류: {e}")
+        logger.error(f"테슬라 네이버 블로그 수집 오류: {e}")
+    try:
+        news += fetch_tesla_clien()
+    except Exception as e:
+        logger.error(f"테슬라 클리앙 뉴스 수집 오류: {e}")
+    try:
+        news += fetch_tesla_dcincide()
+    except Exception as e:
+        logger.error(f"테슬라 DCinside 뉴스 수집 오류: {e}")
     return news

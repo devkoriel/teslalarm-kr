@@ -265,12 +265,12 @@ CATEGORY_FIELD_INFO = {
             "published": "게시일",
         },
     },
-    "tesla_good_tips": {
-        "display": "테슬라 꿀팁",
+    "useful_info": {
+        "display": "테슬라 유용한 정보",
         "emoji": "👍",
         "fields": {
             "title": "제목",
-            "tip_details": "꿀팁 내용",
+            "useful_info_details": "내용",
             "published": "게시일",
         },
     },
