@@ -22,3 +22,7 @@ BOT_ADMIN_IDS = [7144670844]
 WEBHOOK_URL = os.getenv("WEBHOOK_URL")  # 반드시 외부에서 접근 가능한 HTTPS URL로 설정
 WEBHOOK_PORT = int(os.getenv("WEBHOOK_PORT", 8080))
 WEBHOOK_LISTEN = os.getenv("WEBHOOK_LISTEN", "0.0.0.0")
+
+# 네이버 API 관련 설정
+X_NAVER_CLIENT_ID = os.getenv("X_NAVER_CLIENT_ID")
+X_NAVER_CLIENT_SECRET = os.getenv("X_NAVER_CLIENT_SECRET")

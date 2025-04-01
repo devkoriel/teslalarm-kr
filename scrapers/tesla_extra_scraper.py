@@ -1,9 +1,14 @@
+import json
 from io import BytesIO
-from urllib.parse import quote, urljoin
+from urllib.parse import quote
 
 import pycurl
 from bs4 import BeautifulSoup
 
+from config import (
+    X_NAVER_CLIENT_ID,
+    X_NAVER_CLIENT_SECRET,
+)
 from utils.logger import setup_logger
 
 logger = setup_logger()
@@ -18,7 +23,8 @@ NAVER_BLOG_HEADERS = {
         "AppleWebKit/537.36 (KHTML, like Gecko) "
         "Chrome/115.0.0.0 Safari/537.36"
     ),
-    "Referer": "https://blog.naver.com/",
+    "X-Naver-Client-Id": X_NAVER_CLIENT_ID,
+    "X-Naver-Client-Secret": X_NAVER_CLIENT_SECRET,
 }
 
 
@@ -192,25 +198,27 @@ def fetch_tesla_good_tips():
     테슬라 꿀팁 검색 결과 페이지에서 포스트들을 스크래핑합니다.
 
     절차:
-      1. search_url에서 HTML을 가져와 BeautifulSoup으로 파싱합니다.
-      2. <div class="list_search_post"> 요소들을 순회하며, 각 포스트의 링크, 제목, 작성자, 날짜 등의 간략 정보를 추출합니다.
+      1. 네이버 오픈 API를 이용해 블로그 검색 결과(JSON)를 가져옵니다.
+      2. JSON 응답에서 각 포스트의 링크, 제목, 작성자, 날짜 등의 정보를 추출합니다.
       3. 각 포스트 링크를 follow하여 fetch_post_content() 함수를 통해 본문 내용을 가져옵니다.
       4. 각 포스트 정보를 dict 형태로 items 리스트에 추가합니다.
 
     반환 예시 item:
       {
         "title": "테슬라 꿀팁 ...",
-        "post_url": "https://blog.naver.com/xxx/223675082867",
-        "author": "랄랄라365",
-        "date": "2024. 11. 27.",
+        "url": "https://blog.naver.com/xxx/223675082867",
+        "published": "2024. 11. 27.",
         "content": "실제 본문 내용...",
-        "source": "Naver Blog"
+        "source": "Naver Blog",
+        "news_type": "domestic"
       }
     """
     try:
         items = []
         try:
-            url = "https://section.blog.naver.com/Search/Post.nhn?keyword=" + quote("테슬라 꿀팁")
+            # OpenAPI 호출 URL (검색어는 URL 인코딩 처리)
+            search_query = quote("테슬라 꿀팁")
+            url = f"https://openapi.naver.com/v1/search/blog?query={search_query}&display=100&start=1&sort=sim"
             status, res_text = pycurl_get(url, headers=NAVER_BLOG_HEADERS, timeout=10)
             if status != 200:
                 raise Exception(f"HTTP status {status}")
@@ -218,38 +226,30 @@ def fetch_tesla_good_tips():
             logger.error(f"테슬라 꿀팁 검색 결과 페이지 수집 오류: {e}")
             return items
 
-        soup = BeautifulSoup(res_text, "html.parser")
-        # 검색 결과는 ng-repeat으로 생성되므로, 여러 <div class="list_search_post">가 존재합니다.
-        post_divs = soup.find_all("div", class_="list_search_post")
-        logger.info(f"검색 결과 포스트 수: {len(post_divs)}")
-        for post in post_divs:
+        # JSON 응답 파싱
+        data = json.loads(res_text)
+        blog_items = data.get("items", [])
+        logger.info(f"검색 결과 포스트 수: {len(blog_items)}")
+        for blog_item in blog_items:
             try:
-                # <a class="desc_inner"> 태그에서 포스트 링크와 제목 추출
-                link_tag = post.find("a", class_="desc_inner")
-                if not link_tag:
-                    continue
-                post_url = link_tag.get("href")
-                title = link_tag.get_text(strip=True)
-                # 작성자 및 날짜 정보 추출
-                writer_info = post.find("div", class_="writer_info")
-                author = ""
-                date = ""
-                if writer_info:
-                    author_tag = writer_info.find("a", class_="author")
-                    if author_tag:
-                        author = author_tag.get_text(strip=True)
-                    date_tag = writer_info.find("span", class_="date")
-                    if date_tag:
-                        date = date_tag.get_text(strip=True)
-
-                # 본문 내용은 포스트 페이지 내 iframe에 있으므로 fetch_post_content() 호출
-                content = fetch_post_content(post_url)
+                # 제목에는 <b> 태그 등이 포함되어 있으므로 BeautifulSoup으로 정리
+                title_raw = blog_item.get("title", "")
+                title = BeautifulSoup(title_raw, "html.parser").get_text(strip=True)
+                post_url = blog_item.get("link", "")
+                description_raw = blog_item.get("description", "")
+                description = BeautifulSoup(description_raw, "html.parser").get_text(strip=True)
+                postdate = blog_item.get("postdate", "")
+                # postdate가 YYYYMMDD 형식이면 "YYYY.MM.DD"로 포맷팅
+                if len(postdate) == 8:
+                    formatted_date = f"{postdate[0:4]}.{postdate[4:6]}.{postdate[6:8]}"
+                else:
+                    formatted_date = postdate
 
                 item = {
                     "title": title,
                     "url": post_url,
-                    "published": date,
-                    "content": content,
+                    "published": formatted_date,
+                    "content": description,
                     "source": "Naver Blog",
                     "news_type": "domestic",
                 }
@@ -260,53 +260,3 @@ def fetch_tesla_good_tips():
     except Exception as e:
         logger.error(f"테슬라 꿀팁 수집 오류: {e}")
         return []
-
-
-def fetch_post_content(post_url):
-    """
-    주어진 포스트 URL의 페이지를 요청한 후,
-    <iframe id="mainFrame">의 src URL을 찾아 해당 URL의 본문 내용을 가져옵니다.
-
-    스크래핑 방어를 우회하기 위해 HEADERS를 함께 사용하며,
-    iframe src는 상대 URL일 수 있으므로 절대 URL로 변환합니다.
-
-    본문 내용은 보통 네이버 블로그의 경우 div#postViewArea 또는 div.se-viewer 내부에 위치합니다.
-    """
-    try:
-        status, res_text = pycurl_get(post_url, headers=NAVER_BLOG_HEADERS, timeout=10)
-        if status != 200:
-            raise Exception(f"HTTP status {status}")
-    except Exception as e:
-        logger.error(f"포스트 페이지 수집 오류 ({post_url}): {e}")
-        return ""
-
-    soup = BeautifulSoup(res_text, "html.parser")
-    iframe = soup.find("iframe", id="mainFrame")
-    if not iframe:
-        logger.error(f"iframe을 찾을 수 없음 ({post_url})")
-        return ""
-    iframe_src = iframe.get("src")
-    if not iframe_src:
-        logger.error(f"iframe src가 없음 ({post_url})")
-        return ""
-    # iframe src가 상대 URL이면 절대 URL로 변환 (네이버 블로그의 경우 https://blog.naver.com 를 기준으로 함)
-    absolute_iframe_url = urljoin("https://blog.naver.com", iframe_src)
-    try:
-        status_iframe, res_iframe_text = pycurl_get(absolute_iframe_url, headers=NAVER_BLOG_HEADERS, timeout=10)
-        if status_iframe != 200:
-            raise Exception(f"HTTP status {status_iframe}")
-    except Exception as e:
-        logger.error(f"iframe 페이지 수집 오류 ({absolute_iframe_url}): {e}")
-        return ""
-
-    soup_iframe = BeautifulSoup(res_iframe_text, "html.parser")
-    # 본문 내용을 포함할 것으로 예상되는 영역: div#postViewArea 또는 div.se-viewer
-    content_container = soup_iframe.find("div", id="postViewArea")
-    if not content_container:
-        content_container = soup_iframe.find("div", class_="se-viewer")
-    if not content_container:
-        logger.error(f"본문 내용을 찾을 수 없음 ({absolute_iframe_url})")
-        return ""
-
-    content_text = content_container.get_text(separator="\n", strip=True)
-    return content_text
