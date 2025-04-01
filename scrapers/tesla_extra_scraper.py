@@ -77,116 +77,119 @@ def fetch_subsidy_info():
       - url: 조회에 사용된 URL
       - source: "tago.kr"
     """
-    items = []
-    base_url = "https://tago.kr/subsidy/index.htm"
-
-    # 메인 페이지 가져오기
     try:
-        status, res_text = pycurl_get(base_url, headers=HEADERS, timeout=10)
-        if status != 200:
-            raise Exception(f"HTTP status {status}")
-    except Exception as e:
-        logger.error(f"보조금 정보 메인 페이지 수집 오류: {e}")
-        return items
+        items = []
+        base_url = "https://tago.kr/subsidy/index.htm"
 
-    soup = BeautifulSoup(res_text, "html.parser")
-
-    # 현재 연도 추출: <select name="year">
-    year_select = soup.find("select", {"name": "year"})
-    if year_select:
-        selected_option = year_select.find("option", selected=True)
-        if selected_option:
-            year = selected_option.get("value", "").strip()
-        else:
-            # 선택된 옵션이 없으면 마지막 옵션의 값 사용
-            options = year_select.find_all("option")
-            year = options[-1].get("value", "").strip() if options else ""
-    else:
-        year = ""
-
-    if not year:
-        logger.error("연도 정보를 찾을 수 없습니다.")
-        return items
-
-    # 모델 옵션 추출: <select name="model">
-    model_select = soup.find("select", {"name": "model"})
-    if not model_select:
-        logger.error("모델 선택 옵션을 찾을 수 없습니다.")
-        return items
-
-    model_options = model_select.find_all("option")
-    # "테슬라" 문자열이 포함된 옵션만 선택 (대소문자 구분없이)
-    tesla_options = [opt for opt in model_options if "테슬라" in opt.get_text()]
-
-    # 각 테슬라 모델별로 보조금 정보 테이블에서 "서울" 지역 정보만 대표로 선택
-    for opt in tesla_options:
-        model_value = opt.get("value", "").strip()
-        model_text = opt.get_text(strip=True)
-        if not model_value:
-            continue
-        # URL 생성 (value 값은 URL 인코딩)
-        url = f"{base_url}?model={quote(model_value)}&year={year}"
+        # 메인 페이지 가져오기
         try:
-            status_model, res_model_text = pycurl_get(url, headers=HEADERS, timeout=10)
-            if status_model != 200:
-                raise Exception(f"HTTP status {status_model}")
+            status, res_text = pycurl_get(base_url, headers=HEADERS, timeout=10)
+            if status != 200:
+                raise Exception(f"HTTP status {status}")
         except Exception as e:
-            logger.error(f"모델 {model_text} 페이지 수집 오류: {e}")
-            continue
+            logger.error(f"보조금 정보 메인 페이지 수집 오류: {e}")
+            return items
 
-        model_soup = BeautifulSoup(res_model_text, "html.parser")
-        table_div = model_soup.find("div", class_="table-style line scroll")
-        if not table_div:
-            logger.error(f"모델 {model_text}의 보조금 테이블을 찾을 수 없습니다.")
-            continue
-        table = table_div.find("table")
-        if not table:
-            logger.error(f"모델 {model_text}의 보조금 테이블 내부를 찾을 수 없습니다.")
-            continue
+        soup = BeautifulSoup(res_text, "html.parser")
 
-        # 각 tbody는 하나의 데이터 행 (지역별 보조금 정보)
-        model_rows = []
-        for tbody in table.find_all("tbody"):
-            tr = tbody.find("tr")
-            if not tr:
+        # 현재 연도 추출: <select name="year">
+        year_select = soup.find("select", {"name": "year"})
+        if year_select:
+            selected_option = year_select.find("option", selected=True)
+            if selected_option:
+                year = selected_option.get("value", "").strip()
+            else:
+                # 선택된 옵션이 없으면 마지막 옵션의 값 사용
+                options = year_select.find_all("option")
+                year = options[-1].get("value", "").strip() if options else ""
+        else:
+            year = ""
+
+        if not year:
+            logger.error("연도 정보를 찾을 수 없습니다.")
+            return items
+
+        # 모델 옵션 추출: <select name="model">
+        model_select = soup.find("select", {"name": "model"})
+        if not model_select:
+            logger.error("모델 선택 옵션을 찾을 수 없습니다.")
+            return items
+
+        model_options = model_select.find_all("option")
+        # "테슬라" 문자열이 포함된 옵션만 선택 (대소문자 구분없이)
+        tesla_options = [opt for opt in model_options if "테슬라" in opt.get_text()]
+
+        # 각 테슬라 모델별로 보조금 정보 테이블에서 "서울" 지역 정보만 대표로 선택
+        for opt in tesla_options:
+            model_value = opt.get("value", "").strip()
+            model_text = opt.get_text(strip=True)
+            if not model_value:
                 continue
-            tds = tr.find_all("td")
-            if len(tds) < 8:
-                continue  # 8개 컬럼 이상이어야 함
-            row_item = {
-                "title": year + "년 " + model_text + " 보조금 정보",
-                "content": {
-                    "area": tds[0].get_text(strip=True),
-                    "city": tds[1].get_text(strip=True),
-                    "price": tds[2].get_text(strip=True),
-                    "national_subsidy": tds[3].get_text(strip=True),
-                    "local_subsidy": tds[4].get_text(strip=True),
-                    "total_subsidy": tds[5].get_text(strip=True),
-                    "expected_price": tds[6].get_text(strip=True),
-                    "reference": tds[7].get_text(strip=True),
-                    "model": model_text,
-                    "year": year,
-                },
-                "url": url,
-                "source": "tago.kr",
-                "published": year + "년 01월 01일 00:00",
-                "news_type": "domestic",
-            }
-            logger.info(f"추출된 보조금 정보: {row_item}")
-            model_rows.append(row_item)
+            # URL 생성 (value 값은 URL 인코딩)
+            url = f"{base_url}?model={quote(model_value)}&year={year}"
+            try:
+                status_model, res_model_text = pycurl_get(url, headers=HEADERS, timeout=10)
+                if status_model != 200:
+                    raise Exception(f"HTTP status {status_model}")
+            except Exception as e:
+                logger.error(f"모델 {model_text} 페이지 수집 오류: {e}")
+                continue
 
-        if not model_rows:
-            continue
+            model_soup = BeautifulSoup(res_model_text, "html.parser")
+            table_div = model_soup.find("div", class_="table-style line scroll")
+            if not table_div:
+                logger.error(f"모델 {model_text}의 보조금 테이블을 찾을 수 없습니다.")
+                continue
+            table = table_div.find("table")
+            if not table:
+                logger.error(f"모델 {model_text}의 보조금 테이블 내부를 찾을 수 없습니다.")
+                continue
 
-        # 우선 "서울" 지역의 정보를 대표로 선택, 없으면 첫 번째 행 선택
-        selected_row = next((row for row in model_rows if row["area"] == "서울"), model_rows[0])
-        items.append(selected_row)
-    return items
+            # 각 tbody는 하나의 데이터 행 (지역별 보조금 정보)
+            model_rows = []
+            for tbody in table.find_all("tbody"):
+                tr = tbody.find("tr")
+                if not tr:
+                    continue
+                tds = tr.find_all("td")
+                if len(tds) < 8:
+                    continue  # 8개 컬럼 이상이어야 함
+                row_item = {
+                    "title": year + "년 " + model_text + " 보조금 정보",
+                    "content": {
+                        "area": tds[0].get_text(strip=True),
+                        "city": tds[1].get_text(strip=True),
+                        "price": tds[2].get_text(strip=True),
+                        "national_subsidy": tds[3].get_text(strip=True),
+                        "local_subsidy": tds[4].get_text(strip=True),
+                        "total_subsidy": tds[5].get_text(strip=True),
+                        "expected_price": tds[6].get_text(strip=True),
+                        "reference": tds[7].get_text(strip=True),
+                        "model": model_text,
+                        "year": year,
+                    },
+                    "url": url,
+                    "source": "tago.kr",
+                    "published": year + "년 01월 01일 00:00",
+                    "news_type": "domestic",
+                }
+                model_rows.append(row_item)
+
+            if not model_rows:
+                continue
+
+            # 우선 "서울" 지역의 정보를 대표로 선택, 없으면 첫 번째 행 선택
+            selected_row = next((row for row in model_rows if row["content"]["area"] == "서울"), model_rows[0])
+            items.append(selected_row)
+        return items
+    except Exception as e:
+        logger.error(f"보조금 정보 수집 오류: {e}")
+        return []
 
 
 def fetch_tesla_good_tips():
     """
-    구매 꿀팁 검색 결과 페이지에서 포스트들을 스크래핑합니다.
+    테슬라 꿀팁 검색 결과 페이지에서 포스트들을 스크래핑합니다.
 
     절차:
       1. search_url에서 HTML을 가져와 BeautifulSoup으로 파싱합니다.
@@ -204,55 +207,59 @@ def fetch_tesla_good_tips():
         "source": "Naver Blog"
       }
     """
-    items = []
     try:
-        url = "https://section.blog.naver.com/Search/Post.nhn?keyword=" + quote("테슬라 꿀팁")
-        status, res_text = pycurl_get(url, headers=NAVER_BLOG_HEADERS, timeout=10)
-        if status != 200:
-            raise Exception(f"HTTP status {status}")
-    except Exception as e:
-        logger.error(f"구매 꿀팁 검색 결과 페이지 수집 오류: {e}")
-        return items
-
-    soup = BeautifulSoup(res_text, "html.parser")
-    # 검색 결과는 ng-repeat으로 생성되므로, 여러 <div class="list_search_post">가 존재합니다.
-    post_divs = soup.find_all("div", class_="list_search_post")
-    logger.info(f"검색 결과 포스트 수: {len(post_divs)}")
-    for post in post_divs:
+        items = []
         try:
-            # <a class="desc_inner"> 태그에서 포스트 링크와 제목 추출
-            link_tag = post.find("a", class_="desc_inner")
-            if not link_tag:
-                continue
-            post_url = link_tag.get("href")
-            title = link_tag.get_text(strip=True)
-            # 작성자 및 날짜 정보 추출
-            writer_info = post.find("div", class_="writer_info")
-            author = ""
-            date = ""
-            if writer_info:
-                author_tag = writer_info.find("a", class_="author")
-                if author_tag:
-                    author = author_tag.get_text(strip=True)
-                date_tag = writer_info.find("span", class_="date")
-                if date_tag:
-                    date = date_tag.get_text(strip=True)
-
-            # 본문 내용은 포스트 페이지 내 iframe에 있으므로 fetch_post_content() 호출
-            content = fetch_post_content(post_url)
-
-            item = {
-                "title": title,
-                "url": post_url,
-                "published": date,
-                "content": content,
-                "source": "Naver Blog",
-                "news_type": "domestic",
-            }
-            items.append(item)
+            url = "https://section.blog.naver.com/Search/Post.nhn?keyword=" + quote("테슬라 꿀팁")
+            status, res_text = pycurl_get(url, headers=NAVER_BLOG_HEADERS, timeout=10)
+            if status != 200:
+                raise Exception(f"HTTP status {status}")
         except Exception as e:
-            logger.error(f"포스트 처리 중 오류: {e}")
-    return items
+            logger.error(f"테슬라 꿀팁 검색 결과 페이지 수집 오류: {e}")
+            return items
+
+        soup = BeautifulSoup(res_text, "html.parser")
+        # 검색 결과는 ng-repeat으로 생성되므로, 여러 <div class="list_search_post">가 존재합니다.
+        post_divs = soup.find_all("div", class_="list_search_post")
+        logger.info(f"검색 결과 포스트 수: {len(post_divs)}")
+        for post in post_divs:
+            try:
+                # <a class="desc_inner"> 태그에서 포스트 링크와 제목 추출
+                link_tag = post.find("a", class_="desc_inner")
+                if not link_tag:
+                    continue
+                post_url = link_tag.get("href")
+                title = link_tag.get_text(strip=True)
+                # 작성자 및 날짜 정보 추출
+                writer_info = post.find("div", class_="writer_info")
+                author = ""
+                date = ""
+                if writer_info:
+                    author_tag = writer_info.find("a", class_="author")
+                    if author_tag:
+                        author = author_tag.get_text(strip=True)
+                    date_tag = writer_info.find("span", class_="date")
+                    if date_tag:
+                        date = date_tag.get_text(strip=True)
+
+                # 본문 내용은 포스트 페이지 내 iframe에 있으므로 fetch_post_content() 호출
+                content = fetch_post_content(post_url)
+
+                item = {
+                    "title": title,
+                    "url": post_url,
+                    "published": date,
+                    "content": content,
+                    "source": "Naver Blog",
+                    "news_type": "domestic",
+                }
+                items.append(item)
+            except Exception as e:
+                logger.error(f"포스트 처리 중 오류: {e}")
+        return items
+    except Exception as e:
+        logger.error(f"테슬라 꿀팁 수집 오류: {e}")
+        return []
 
 
 def fetch_post_content(post_url):
