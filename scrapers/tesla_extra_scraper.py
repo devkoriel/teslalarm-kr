@@ -154,19 +154,25 @@ def fetch_subsidy_info():
             if len(tds) < 8:
                 continue  # 8개 컬럼 이상이어야 함
             row_item = {
-                "area": tds[0].get_text(strip=True),
-                "city": tds[1].get_text(strip=True),
-                "price": tds[2].get_text(strip=True),
-                "national_subsidy": tds[3].get_text(strip=True),
-                "local_subsidy": tds[4].get_text(strip=True),
-                "total_subsidy": tds[5].get_text(strip=True),
-                "expected_price": tds[6].get_text(strip=True),
-                "reference": tds[7].get_text(strip=True),
-                "model": model_text,
-                "year": year,
+                "title": year + "년 " + model_text + " 보조금 정보",
+                "content": {
+                    "area": tds[0].get_text(strip=True),
+                    "city": tds[1].get_text(strip=True),
+                    "price": tds[2].get_text(strip=True),
+                    "national_subsidy": tds[3].get_text(strip=True),
+                    "local_subsidy": tds[4].get_text(strip=True),
+                    "total_subsidy": tds[5].get_text(strip=True),
+                    "expected_price": tds[6].get_text(strip=True),
+                    "reference": tds[7].get_text(strip=True),
+                    "model": model_text,
+                    "year": year,
+                },
                 "url": url,
                 "source": "tago.kr",
+                "published": year + "년 01월 01일 00:00",
+                "news_type": "domestic",
             }
+            logger.info(f"추출된 보조금 정보: {row_item}")
             model_rows.append(row_item)
 
         if not model_rows:
@@ -200,7 +206,7 @@ def fetch_tesla_good_tips():
     """
     items = []
     try:
-        url = "https://section.blog.naver.com/Search/Post.nhn?keyword=테슬라+꿀팁"
+        url = "https://section.blog.naver.com/Search/Post.nhn?keyword=" + quote("테슬라 꿀팁")
         status, res_text = pycurl_get(url, headers=NAVER_BLOG_HEADERS, timeout=10)
         if status != 200:
             raise Exception(f"HTTP status {status}")
@@ -237,11 +243,11 @@ def fetch_tesla_good_tips():
 
             item = {
                 "title": title,
-                "post_url": post_url,
-                "author": author,
-                "date": date,
+                "url": post_url,
+                "published": date,
                 "content": content,
                 "source": "Naver Blog",
+                "news_type": "domestic",
             }
             items.append(item)
         except Exception as e:
