@@ -1,6 +1,5 @@
 from datetime import datetime
 
-# 미리 정의된 카테고리별 헤더, 이모지, 그리고 각 뉴스 항목에서 추출해야 할 필드의 라벨 매핑
 CATEGORY_FIELD_INFO = {
     "model_price_up": {
         "display": "차량 가격 상승",
@@ -252,25 +251,38 @@ CATEGORY_FIELD_INFO = {
             "trust_reason": "신뢰도 판단 기준",
         },
     },
+    "subsidy_info": {
+        "display": "테슬라 구매 보조금 정보",
+        "emoji": "💰",
+        "fields": {
+            "title": "제목",
+            "year": "연도",
+            "model": "모델명",
+            "area": "지역",
+            "city": "시/군/구",
+            "expected_price": "예상 구매가",
+            "subsidy_details": "보조금 세부사항",
+        },
+    },
+    "tesla_good_tips": {
+        "display": "테슬라 꿀팁",
+        "emoji": "👍",
+        "fields": {
+            "title": "제목",
+            "tip_details": "꿀팁 내용",
+            "published": "게시일",
+        },
+    },
 }
 
 
 def format_detailed_message(news_categories: dict, news_type: str, language="ko", url_mapping: dict = None) -> list:
-    """
-    news_categories: OpenAI 분석 결과 JSON. 각 키는 카테고리명, 값은 뉴스 항목 리스트 (각 항목은 dict).
-    news_type: "domestic" 또는 "overseas"
-    language: 'ko' 또는 'en'
-    url_mapping: 뉴스 제목을 key로 하고 해당 뉴스에 인용된 기사 리스트를 value로 가지는 딕셔너리.
-
-    각 뉴스 항목을 HTML 메시지 문자열로 포맷하여 개별 메시지 리스트로 반환합니다.
-    """
     messages = []
     for cat_key, news_list in news_categories.items():
         if cat_key not in CATEGORY_FIELD_INFO:
-            continue  # 미리 정의된 카테고리만 처리
+            continue
         info = CATEGORY_FIELD_INFO[cat_key]
         for item in news_list:
-            # 뉴스 게시일 처리
             published = item.get("published", "").strip()
             if not published:
                 published = (
@@ -278,16 +290,14 @@ def format_detailed_message(news_categories: dict, news_type: str, language="ko"
                     if language == "ko"
                     else datetime.now().strftime("%B %d, %Y %H:%M")
                 )
-            # 신뢰도 처리
             trust = item.get("trust", "")
             if isinstance(trust, (int, float)):
-                trust = f"{int(trust * 100)}%"
+                trust = f"{int(trust*100)}%"
             else:
                 trust = str(trust).strip()
             trust_reason = item.get("trust_reason", "").strip()
             title = item.get("title", "").strip()
 
-            # 인용 기사 처리
             citations = []
             if "urls" in item and isinstance(item["urls"], list) and item["urls"]:
                 citations = [{"url": url, "title": "인용 기사"} for url in item["urls"]]
@@ -314,11 +324,9 @@ def format_detailed_message(news_categories: dict, news_type: str, language="ko"
                                     {"url": cit.get("url", "#"), "title": cit.get("title", "인용 기사")}
                                 )
                         citations = new_citations
-
             if not citations:
                 citations = [{"url": item.get("url", "#"), "title": "인용 기사"}]
 
-            # 대표 인용 기사 링크 및 추가 인용 기사
             if isinstance(citations, list) and len(citations) > 0:
                 first_cit = citations[0]
                 if isinstance(first_cit, dict) and "url" in first_cit:
@@ -343,9 +351,7 @@ def format_detailed_message(news_categories: dict, news_type: str, language="ko"
                         continue
                     additional_citations.append(f"<a href='{link_cit}'>{title_cit}</a>")
 
-            # 헤더 구성
             header = f"{info['emoji']} <a href='{citation_header_link}'><b>[{'국내' if news_type=='domestic' else '해외'}] {info['display']} 뉴스 - {title}</b></a>"
-            # 세부사항 구성
             detail_lines = []
             for field_key, label in info["fields"].items():
                 if field_key in ["trust", "trust_reason", "published"]:
@@ -354,7 +360,6 @@ def format_detailed_message(news_categories: dict, news_type: str, language="ko"
                 if value:
                     detail_lines.append(f"\n<b>{label}:</b> {value}")
             details = "\n" + "\n".join(detail_lines) if detail_lines else ""
-            # 뉴스 게시일, 신뢰도, 인용 기사 구성
             published_line = f"<b>뉴스 게시일:</b> {published}"
             trust_line = f"<b>신뢰도:</b> {trust}\n<b>신뢰도 판단 기준:</b> {trust_reason}"
             citation_lines = ""

@@ -7,15 +7,10 @@ from config import OPENAI_API_KEY
 from utils.logger import setup_logger
 
 logger = setup_logger()
-
 openai.api_key = OPENAI_API_KEY
 
 
 def count_tokens(text: str, model: str = "o3") -> int:
-    """
-    tiktoken을 이용하여 텍스트의 토큰 수를 정확하게 계산합니다.
-    model에 따라 적절한 인코딩을 선택하며, 모델에 대한 인코딩 정보가 없으면 o200k_base를 사용합니다.
-    """
     try:
         encoding = tiktoken.encoding_for_model(model)
     except KeyError:
@@ -49,8 +44,10 @@ async def analyze_and_extract_fields(consolidated_text: str, language: str = "ko
         "19. 테슬라 브랜드 이미지 및 마케팅 전략: 'marketing_details', 'published', 'trust', 'trust_reason'\n"
         "20. 테슬라 인수합병 및 기업 전략: 'strategy_details', 'published', 'trust', 'trust_reason'\n"
         "21. 테슬라 팬 커뮤니티 및 소셜 미디어 트렌드: 'community_details', 'published', 'trust', 'trust_reason'\n"
-        "22. 경제·금융 및 산업 분석: 'analysis_details', 'published', 'trust', 'trust_reason'\n\n"
-        "출력은 반드시 아래 JSON 형식으로 해줘 (미리 정의된 카테고리에 속하지 않는 뉴스는 출력하지 말아줘):\n"
+        "22. 경제·금융 및 산업 분석: 'analysis_details', 'published', 'trust', 'trust_reason'\n"
+        "23. 테슬라 구매 보조금 정보: 'year', 'model', 'area', 'city', 'expected_price', 'subsidy_details'\n"
+        "24. 테슬라 꿀팁: 'tip_details', 'published'\n"
+        "출력은 반드시 아래 JSON 형식으로 해줘 (미리 정의된 카테고리에 속하지 않는 뉴스나 정보성 글은 출력하지 말아줘):\n"
         "{\n"
         '  "model_price_up": [ { "title": "...", "price": "...", "change": "...", "details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
         '  "model_price_down": [ { "title": "...", "price": "...", "change": "...", "details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
@@ -73,22 +70,24 @@ async def analyze_and_extract_fields(consolidated_text: str, language: str = "ko
         '  "marketing_update": [ { "title": "...", "marketing_details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
         '  "strategy_update": [ { "title": "...", "strategy_details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
         '  "community_update": [ { "title": "...", "community_details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
-        '  "analysis_update": [ { "title": "...", "analysis_details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ]\n'
+        '  "analysis_update": [ { "title": "...", "analysis_details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
+        '  "subsidy_info": [ { "title": "...", "year": "...", "model": "...", "area": "...", "city": "...", "expected_price": "...",  "subsidy_details": "...", "urls": ["...", ...] }, ... ],\n'
+        '  "tesla_good_tips": [ { "title": "...", "tip_details": "...", "published": "...", "urls": ["...", ...] }, ... ],\n'
         "}\n\n"
-        "※ 모든 뉴스 항목은 한국 시장과 한국에 국한된 Tesla 관련 뉴스여야 하며, 차량 가격 관련 카테고리의 details는 반드시 가능하면 그 모델의 트림별 가격 정보를 반드시 포함해야해. new_model 뉴스의 release_date는 새로운 모델의 출시일이야. 각 뉴스의 발행 일시는 표준대로 반드시 '%Y년 %m월 %d일 %H:%M' 형식으로 작성해줘. 각 카테고리들의 뉴스들의 각 urls 필드는 각 카테고리의 뉴스들을 분류할 때 사용된 관련 URL 목록으로, 정리된 소식에 반드시 직접적 100% 관련이 있고 신뢰도 높은 순서대로 가능하면 서로 다른 최대 3개를 원본 URL 그대로 포함해야 해. 언어는 {language}으로 작성해.\n\n"
+        "※ 모든 뉴스 항목은 한국 시장과 한국에 국한된 Tesla 관련 뉴스여야 하며, 차량 가격 관련 카테고리의 details는 반드시 가능하면 그 모델의 트림별 가격 정보를 반드시 포함해야해. new_model 뉴스의 release_date는 새로운 모델의 출시일이야. 각 뉴스의 발행 일시는 반드시 '%Y년 %m월 %d일 %H:%M' 형식으로 작성해줘. 각 카테고리의 urls 필드는 해당 뉴스나 정보성 글과 직접적으로 100% 관련되고 신뢰도 높은 순서대로, 가능한 서로 다른 최대 3개의 원본 URL을 포함해야 해.\n\n"
+        "※ 테슬라 구매 보조금 정보와 테슬라 꿀팁은 뉴스가 아닌 정보성 글이야.\n\n"
+        "언어는 {language}으로 작성해.\n\n"
         "기사 텍스트:\n"
     )
 
-    # tiktoken을 사용해 정확하게 토큰 수 계산
     system_token_count = count_tokens(system_message, model="o3")
     prompt_token_count = count_tokens(prompt, model="o3")
     consolidated_text_token_count = count_tokens(consolidated_text, model="o3")
     total_input_tokens = system_token_count + prompt_token_count + consolidated_text_token_count
 
     max_context_tokens = 195_000
-    max_input_tokens = max_context_tokens - 10_000  # 최소 10,000 토큰 확보
+    max_input_tokens = max_context_tokens - 10_000
     if total_input_tokens > max_input_tokens:
-        # 허용 가능한 consolidated_text 토큰 수 계산
         allowed_consolidated_tokens = max_input_tokens - (system_token_count + prompt_token_count)
         try:
             encoding = tiktoken.encoding_for_model("o3")

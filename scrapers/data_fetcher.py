@@ -1,5 +1,3 @@
-# scrapers/data_fetcher.py
-
 from scrapers.korean_news_scraper import (
     fetch_auto_danawa_news,
     fetch_autodaily_news,
@@ -11,6 +9,10 @@ from scrapers.korean_news_scraper import (
     fetch_itchosun_news,
     fetch_motorgraph_news,
     fetch_naver_news,
+)
+from scrapers.tesla_extra_scraper import (
+    fetch_subsidy_info,
+    fetch_tesla_good_tips,
 )
 from utils.logger import setup_logger
 
@@ -59,4 +61,12 @@ def collect_domestic_news():
         news += fetch_itchosun_news()
     except Exception as e:
         logger.error(f"IT조선 뉴스 수집 오류: {e}")
+    try:
+        news += fetch_subsidy_info()
+    except Exception as e:
+        logger.error(f"보조금 정보 수집 오류: {e}")
+    try:
+        news += fetch_tesla_good_tips()
+    except Exception as e:
+        logger.error(f"테슬라 꿀팁 수집 오류: {e}")
     return news
