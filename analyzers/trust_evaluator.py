@@ -19,10 +19,10 @@ def count_tokens(text: str, model: str = "o3") -> int:
 
 
 async def analyze_and_extract_fields(consolidated_text: str, language: str = "ko") -> dict:
-    system_message = "너는 Tesla 뉴스 분석 전문가이자 카테고리 분류 도우미입니다."
+    system_message = "너는 Tesla 뉴스와 정보성 글 분석 전문가이자 카테고리 분류 도우미입니다."
     prompt = (
-        "아래 Tesla 뉴스 기사를 분석하여, 미리 정의된 카테고리별로 여러 뉴스들을 중복 제거해서 분류하고, "
-        "각 뉴스 항목에 대해 필요한 정보를 아래 필드로 정리해줘.\n\n"
+        "아래 Tesla 뉴스 기사나 정보성 글을 분석하여, 미리 정의된 카테고리별로 여러 뉴스들이나 정보성 글들을 중복 제거해서 분류하고, "
+        "각 뉴스나 정보성 글 항목에 대해 필요한 정보를 아래 필드로 정리해줘.\n\n"
         "1. 차량 모델 가격 상승: 'price', 'change', 'details', 'published' (발표 일시), 'trust' (신뢰도 0~1), 'trust_reason' (신뢰도 판단 기준)\n"
         "2. 차량 모델 가격 하락: 'price', 'change', 'details', 'published', 'trust', 'trust_reason'\n"
         "3. 새로운 차량 모델 출시: 'model_name', 'release_date', 'details', 'published', 'trust', 'trust_reason'\n"
@@ -46,8 +46,8 @@ async def analyze_and_extract_fields(consolidated_text: str, language: str = "ko
         "21. 테슬라 팬 커뮤니티 및 소셜 미디어 트렌드: 'community_details', 'published', 'trust', 'trust_reason'\n"
         "22. 경제·금융 및 산업 분석: 'analysis_details', 'published', 'trust', 'trust_reason'\n"
         "23. 테슬라 구매 보조금 정보: 'year', 'model', 'area', 'city', 'expected_price', 'subsidy_details', 'published'\n"
-        "24. 테슬라 꿀팁: 'tip_details', 'published'\n"
-        "출력은 반드시 아래 JSON 형식으로만 해줘 (미리 정의된 카테고리에 속하지 않는 뉴스나 정보성 글은 출력하지 말아줘):\n"
+        "24. 테슬라 꿀팁: 'tip_details', 'published'\n\n"
+        "응답은 JSON parser로 바로 parsing 할 수 있도록 반드시 아래 JSON 형식으로 해줘 (미리 정의된 카테고리에 속하지 않는 뉴스나 정보성 글은 포함하지 말아줘):\n"
         "{\n"
         '  "model_price_up": [ { "title": "...", "price": "...", "change": "...", "details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
         '  "model_price_down": [ { "title": "...", "price": "...", "change": "...", "details": "...", "published": "...", "trust": 0.0, "trust_reason": "...", "urls": ["...", ...] }, ... ],\n'
@@ -74,14 +74,14 @@ async def analyze_and_extract_fields(consolidated_text: str, language: str = "ko
         '  "subsidy_info": [ { "title": "...", "year": "...", "model": "...", "area": "...", "city": "...", "expected_price": "...",  "subsidy_details": "...", "published": "...", "urls": ["...", ...] }, ... ],\n'
         '  "tesla_good_tips": [ { "title": "...", "tip_details": "...", "published": "...", "urls": ["...", ...] }, ... ],\n'
         "}\n\n"
-        "※ 모든 뉴스 항목은 한국 시장과 한국에 국한된 Tesla 관련 뉴스여야 하며, 차량 가격 관련 카테고리의 details는 반드시 가능하면 그 모델의 트림별 가격 정보를 반드시 포함해야해. new_model 뉴스의 release_date는 새로운 모델의 출시일이야. 각 뉴스의 발행 일시는 반드시 '%Y년 %m월 %d일 %H:%M' 형식으로 작성해줘. 각 카테고리의 urls 필드는 해당 뉴스나 정보성 글과 직접적으로 100% 관련되고 신뢰도 높은 순서대로, 가능한 서로 다른 최대 3개의 원본 URL을 포함해야 해.\n\n"
-        "※ 테슬라 구매 보조금 정보와 테슬라 꿀팁은 뉴스가 아닌 정보성 글이야.\n\n"
-        '※ subsidy_info[].subsidy_details는 모두 다 무조건 "서울 외 지역의 자세한 보조금 정보는 링크를 눌러 확인하세요."로 고정해.\n\n'
-        '※ subsidy_info[].year 뒤에는 반드시 "년"을 붙여줘.\n\n'
-        '※ subsidy_info[].expected_price 뒤에는 반드시 "만원"을 붙여줘. 그리고 1,000 단위로 ,를 넣어줘.\n\n'
-        "※ 테슬라 꿀팁은 구매와 할인, 보조금, 레퍼럴, 제품, 용품 등 테슬라 차주들이 관심있을만한 내용만 남겨.\n\n"
+        "※ 모든 뉴스 항목은 한국 시장과 한국에 국한된 Tesla 관련 뉴스여야 하며, 차량 가격 관련 카테고리의 details는 반드시 가능하면 그 모델의 트림별 가격 정보를 반드시 포함해야해. new_model 뉴스의 release_date는 새로운 모델의 출시일이야. 각 뉴스의 발행 일시는 반드시 '%Y년 %m월 %d일 %H:%M' 형식으로 작성해줘. 각 카테고리의 urls 필드는 해당 뉴스나 정보성 글과 직접적으로 100% 관련되고 신뢰도 높은 순서대로, 가능한 서로 다른 최대 3개의 원본 URL을 포함해야 해. "
+        "테슬라 구매 보조금 정보와 테슬라 꿀팁은 뉴스가 아닌 정보성 글이야. "
+        'subsidy_info[].subsidy_details는 모두 다 무조건 "서울 외 지역의 자세한 보조금 정보는 링크를 눌러 확인하세요."로 고정해. '
+        'subsidy_info[].year 뒤에는 반드시 "년"을 붙여줘. '
+        'subsidy_info[].expected_price 뒤에는 반드시 "만원"을 붙여줘. 그리고 1,000 단위로 ,를 넣어줘. '
+        "테슬라 꿀팁은 구매와 할인, 보조금, 유용한 제품, 유용한 용품 같이 테슬라 차주들이 관심있을만한 내용만 남겨서 추려.\n\n"
         "언어는 {language}으로 작성해.\n\n"
-        "기사 텍스트:\n"
+        "기사나 정보성 글 텍스트:\n"
     )
 
     system_token_count = count_tokens(system_message, model="o3")
