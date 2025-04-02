@@ -243,7 +243,7 @@ def fetch_tesla_naver_blog():
                     formatted_date = postdate
 
                 item = {
-                    "title": "[테슬라 정보]" + title,
+                    "title": "[테슬라 정보] " + title,
                     "url": post_url,
                     "published": formatted_date,
                     "content": description,
@@ -361,7 +361,7 @@ def fetch_tesla_clien():
                     content = ""
 
                 item = {
-                    "title": "[테슬라 정보]" + title,
+                    "title": "[테슬라 정보] " + title,
                     "url": full_url,
                     "author": author,
                     "published": published,
@@ -481,7 +481,7 @@ def fetch_tesla_dcincide():
                 content = ""
 
             item = {
-                "title": "[테슬라 정보]" + title,
+                "title": "[테슬라 정보] " + title,
                 "url": full_url,
                 "author": author,
                 "published": published,
