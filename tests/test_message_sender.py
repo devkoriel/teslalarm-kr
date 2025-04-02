@@ -7,17 +7,28 @@ from telegram_bot import message_sender
 class FakeBot:
     def __init__(self, token):
         self.token = token
+        self.messages = []
 
     async def send_message(self, chat_id, text, parse_mode):
-        return {"chat_id": chat_id, "text": text, "parse_mode": parse_mode}
+        message = {"chat_id": chat_id, "text": text, "parse_mode": parse_mode}
+        self.messages.append(message)
+        return message
+
+
+# Store a reference to the fake bot for test assertions
+fake_bot_instance = None
 
 
 def fake_bot_init(token):
-    return FakeBot(token)
+    global fake_bot_instance
+    fake_bot_instance = FakeBot(token)
+    return fake_bot_instance
 
 
 @pytest.fixture(autouse=True)
 def patch_bot(monkeypatch):
+    global fake_bot_instance
+    fake_bot_instance = None
     monkeypatch.setattr(message_sender, "Bot", fake_bot_init)
 
 

@@ -17,7 +17,7 @@ def dummy_collect_domestic_news():
     ]
 
 
-async def dummy_analyze_and_extract_fields(text, language="ko"):
+async def dummy_analyze_and_extract_fields(text, language="ko", source_type="news"):
     return {
         "model_price_up": [
             {

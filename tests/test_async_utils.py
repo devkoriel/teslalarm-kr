@@ -14,32 +14,31 @@ class FakeResponse:
         pass
 
 
-class FakeSession:
-    async def get(self, url, headers=None):
-        self.url = url
+class FakeClientSession:
+    def __init__(self, *args, **kwargs):
+        self.closed = False
+
+    async def get(self, url, headers=None, timeout=None):
         return FakeResponse()
+
+    def get_response(self, url, headers=None):
+        return FakeResponse()
+
+    async def close(self):
+        self.closed = True
 
     async def __aenter__(self):
         return self
 
     async def __aexit__(self, exc_type, exc, tb):
-        pass
-
-
-class FakeClientSession:
-    def __init__(self, *args, **kwargs):
-        pass
-
-    async def __aenter__(self):
-        return FakeSession()
-
-    async def __aexit__(self, exc_type, exc, tb):
-        pass
+        self.closed = True
 
 
 @pytest.fixture(autouse=True)
 def patch_aiohttp(monkeypatch):
     monkeypatch.setattr(async_utils, "aiohttp", type("FakeAiohttp", (), {"ClientSession": FakeClientSession}))
+    # Also mock the get_session function
+    monkeypatch.setattr(async_utils, "get_session", lambda: FakeClientSession())
 
 
 @pytest.mark.asyncio

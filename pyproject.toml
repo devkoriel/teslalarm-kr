@@ -57,3 +57,7 @@ exclude = [".git", "__pycache__", "venv"]
 
 [tool.autopep8]
 max_line_length = 120
+
+[tool.pytest.ini_options]
+asyncio_mode = "strict"
+markers = ["asyncio: Mark test to run with pytest-asyncio"]

@@ -1,6 +1,6 @@
 import pytest
 
-from telegram_bot import command_handler, message_sender
+from telegram_bot import command_handler, message_sender, user_settings
 
 
 # Dummy User, Message, Update, Context classes
@@ -36,11 +36,13 @@ async def test_change_language_not_admin(monkeypatch):
 
     async def fake_send_message(user_id, message):
         messages.append((user_id, message))
+        return {"chat_id": user_id, "text": message}
 
     monkeypatch.setattr(message_sender, "send_message_to_user", fake_send_message)
     update = FakeUpdate(FakeUser(999))  # User not in admin list
     context = FakeContext(args=["en"])
     await command_handler.change_language(update, context)
+    assert len(messages) > 0
     assert messages[0][1] == "이 명령어를 사용할 권한이 없습니다."
 
 
@@ -50,14 +52,21 @@ async def test_change_language_admin(monkeypatch):
 
     async def fake_send_message(user_id, message):
         messages.append((user_id, message))
+        return {"chat_id": user_id, "text": message}
+
+    def fake_set_user_language(user_id, lang_code):
+        return True
 
     monkeypatch.setattr(message_sender, "send_message_to_user", fake_send_message)
+    monkeypatch.setattr(user_settings, "set_user_language", fake_set_user_language)
+
     admin_id = 7144670844  # Present in BOT_ADMIN_IDS in config
     update = FakeUpdate(FakeUser(admin_id))
     context = FakeContext(args=["en"])
     await command_handler.change_language(update, context)
     # Success message should be sent (in Korean or English)
-    assert "한국어" in messages[0][1] or "Language changed" in messages[0][1]
+    assert len(messages) > 0
+    assert "Language changed" in messages[0][1]
 
 
 @pytest.mark.asyncio
