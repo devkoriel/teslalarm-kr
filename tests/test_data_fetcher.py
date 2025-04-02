@@ -6,6 +6,7 @@ def dummy_fetch():
 
 
 def test_collect_domestic_news(monkeypatch):
+    # Mock all news sources
     monkeypatch.setattr(data_fetcher, "fetch_naver_news", dummy_fetch)
     monkeypatch.setattr(data_fetcher, "fetch_motorgraph_news", lambda: dummy_fetch())
     monkeypatch.setattr(data_fetcher, "fetch_auto_danawa_news", lambda: dummy_fetch())
@@ -16,6 +17,10 @@ def test_collect_domestic_news(monkeypatch):
     monkeypatch.setattr(data_fetcher, "fetch_chosunbiz_news", lambda: dummy_fetch())
     monkeypatch.setattr(data_fetcher, "fetch_autodaily_news", lambda: dummy_fetch())
     monkeypatch.setattr(data_fetcher, "fetch_itchosun_news", lambda: dummy_fetch())
+
+    # Mock all info sources to return empty lists
+    monkeypatch.setattr(data_fetcher, "collect_info_sources", lambda: [])
+
     news = data_fetcher.collect_domestic_news()
     # 10개의 뉴스 함수가 모두 dummy_fetch를 호출하므로 총 10개의 아이템이 있어야 함.
     assert len(news) == 10

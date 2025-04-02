@@ -19,7 +19,7 @@ class FakeRedis:
 @pytest.fixture(autouse=True)
 def patch_redis(monkeypatch):
     fake_r = FakeRedis()
-    monkeypatch.setattr(cache, "r", fake_r)
+    monkeypatch.setattr(cache, "get_redis_client", lambda: fake_r)
 
 
 def test_generate_news_hash():
