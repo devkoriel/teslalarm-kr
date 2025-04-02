@@ -221,7 +221,7 @@ def fetch_tesla_naver_blog():
 
     Returns:
         List of dictionaries containing blog post information with fields:
-        - title: Post title with "[테슬라 정보]" prefix
+        - title: Post title
         - url: Post URL
         - published: Publication date (formatted)
         - content: Post description or content
@@ -258,7 +258,7 @@ def fetch_tesla_naver_blog():
                     formatted_date = postdate
 
                 item = {
-                    "title": "[테슬라 정보] " + title,
+                    "title": title,
                     "url": post_url,
                     "published": formatted_date,
                     "content": description,
@@ -285,7 +285,7 @@ def fetch_tesla_clien():
 
     Returns:
         List of dictionaries containing post information with fields:
-        - title: Post title with "[테슬라 정보]" prefix
+        - title: Post title
         - url: Post URL
         - author: Post author name
         - published: Publication date/time
@@ -366,7 +366,7 @@ def fetch_tesla_clien():
                     content = ""
 
                 item = {
-                    "title": "[테슬라 정보] " + title,
+                    "title": title,
                     "url": full_url,
                     "author": author,
                     "published": published,
@@ -394,7 +394,7 @@ def fetch_tesla_dcincide():
 
     Returns:
         List of dictionaries containing post information with fields:
-        - title: Post title with "[테슬라 정보]" prefix
+        - title: Post title
         - url: Post URL
         - author: Post author name
         - published: Publication date/time
@@ -476,7 +476,7 @@ def fetch_tesla_dcincide():
                 content = ""
 
             item = {
-                "title": "[테슬라 정보] " + title,
+                "title": title,
                 "url": full_url,
                 "author": author,
                 "published": published,
