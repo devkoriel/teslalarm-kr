@@ -3,7 +3,7 @@ from telegram_bot import bot
 
 def test_create_application():
     app = bot.create_application()
-    # 기본적으로 Application이 생성되고 핸들러가 추가되어 있어야 합니다.
+    # By default, Application should be created and handlers should be added
     assert app is not None
-    # 실제 핸들러의 개수를 확인하거나 명령어가 등록되었는지 간단히 체크합니다.
-    # (자세한 검증은 telegram.ext의 내부 구조에 따라 달라질 수 있습니다.)
+    # Check the number of actual handlers or simply verify if commands are registered
+    # (Detailed verification may depend on the internal structure of telegram.ext)

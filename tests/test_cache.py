@@ -31,7 +31,7 @@ def test_generate_news_hash():
 
 def test_is_duplicate():
     news_item = {"url": "http://example.com", "title": "Test"}
-    # 처음 호출: 중복이 아니어야 함.
+    # First call: should not be a duplicate
     assert not cache.is_duplicate(news_item, expire_seconds=10)
-    # 두 번째 호출: 중복으로 판정되어야 함.
+    # Second call: should be identified as a duplicate
     assert cache.is_duplicate(news_item, expire_seconds=10)

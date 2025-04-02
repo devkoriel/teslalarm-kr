@@ -6,7 +6,7 @@ class FakeConnection:
 
 
 def fake_connect(db_url):
-    # 환경변수로 설정된 DATABASE_URL가 올바른지 확인합니다.
+    # Verify that the DATABASE_URL environment variable is set correctly.
     assert db_url == "postgresql://dummy_user:dummy_password@db:5432/test_database"
     return FakeConnection()
 

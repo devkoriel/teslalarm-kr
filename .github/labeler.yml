@@ -1,5 +1,5 @@
 # .github/labeler.yml
-# 예시: 파일 경로에 따라 'tests', 'database', 'telegram-bot' 등의 라벨을 자동 부여합니다.
+# Example: Automatically apply labels like 'tests', 'database', 'telegram-bot', etc. based on file paths.
 tests/**:
     - tests
 database/**:

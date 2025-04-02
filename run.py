@@ -1,9 +1,11 @@
 import asyncio
+import signal
 
-from config import SCRAPE_INTERVAL
+from config import DEFAULT_LANGUAGE, FIRST_SCRAPE_DELAY, SCRAPE_INTERVAL, SIMILARITY_THRESHOLD
 from scrapers.data_fetcher import collect_domestic_news
 from telegram_bot.bot import create_application, run_webhook
 from telegram_bot.message_formatter import format_detailed_message
+from utils.async_utils import close_session
 from utils.cache import get_channel_messages, is_duplicate, store_channel_message
 from utils.logger import setup_logger
 
@@ -11,6 +13,15 @@ logger = setup_logger()
 
 
 def build_url_mapping(news_items):
+    """
+    Build a mapping of titles to their corresponding URLs.
+
+    Args:
+        news_items: List of news item dictionaries
+
+    Returns:
+        Dictionary mapping titles to lists of URLs
+    """
     mapping = {}
     for item in news_items:
         title = item.get("title")
@@ -21,43 +32,51 @@ def build_url_mapping(news_items):
 
 
 async def process_news():
-    logger.info("process_news 시작")
-    domestic_news = collect_domestic_news()
-    logger.info(f"총 수집 뉴스 - 국내: {len(domestic_news)}")
+    """
+    Main news processing function.
 
-    # 중복 제거
+    Collects, analyzes, filters, and sends Tesla news alerts.
+    Runs periodically based on SCRAPE_INTERVAL setting.
+    """
+    logger.info("Starting news processing")
+    domestic_news = collect_domestic_news()
+    logger.info(f"Total collected news - domestic: {len(domestic_news)}")
+
+    # Remove duplicates
     domestic_clean = [n for n in domestic_news if not is_duplicate(n)]
-    logger.info(f"중복 제거 후 뉴스 수: {len(domestic_clean)}")
+    logger.info(f"News after deduplication: {len(domestic_clean)}")
 
     if len(domestic_clean) == 0:
-        logger.info("처리할 뉴스가 없습니다.")
+        logger.info("No news to process")
         return
 
-    # URL 매핑 생성
+    # Create URL mapping
     url_mapping = build_url_mapping(domestic_clean)
     domestic_text = " ".join(
-        f"\n---\n제목: {n.get('title')}\n내용: {n.get('content')}\n게시일: {n.get('published')}\n출처: {n.get('source')}\nURL: {n.get('url')}\n---\n"
+        f"\n---\nTitle: {n.get('title')}\nContent: {n.get('content')}\nPublished: {n.get('published')}\nSource: {n.get('source')}\nURL: {n.get('url')}\n---\n"
         for n in domestic_clean
     )
 
-    # OpenAI를 통한 뉴스 분석 및 필드 추출
+    # Analyze news through OpenAI
     from analyzers.trust_evaluator import analyze_and_extract_fields
 
-    domestic_result = await analyze_and_extract_fields(domestic_text, language="ko")
-    logger.info(f"분석 결과 - 국내: {domestic_result}")
+    domestic_result = await analyze_and_extract_fields(domestic_text, language=DEFAULT_LANGUAGE)
+    logger.info(f"Analysis results - domestic: {domestic_result}")
 
-    # 각 뉴스 항목을 개별 메시지로 포맷 (리스트 형태)
-    individual_messages = format_detailed_message(domestic_result, "domestic", language="ko", url_mapping=url_mapping)
+    # Format individual messages
+    individual_messages = format_detailed_message(
+        domestic_result, "domestic", language=DEFAULT_LANGUAGE, url_mapping=url_mapping
+    )
 
-    # Redis에 저장된 기존 채널 메시지 가져오기
+    # Get previously sent messages from Redis
     stored_msgs = get_channel_messages()
 
     from analyzers.similarity_checker import check_similarity
     from telegram_bot.message_sender import send_message_to_channel
 
-    # 기존 메시지가 있는 경우에만 유사도 검사 수행
+    # Check similarity only if there are stored messages
     if len(stored_msgs) > 0:
-        similarity_results = await check_similarity(individual_messages, stored_msgs, language="ko")
+        similarity_results = await check_similarity(individual_messages, stored_msgs, language=DEFAULT_LANGUAGE)
     else:
         similarity_results = [{"already_sent": False, "max_similarity": 0.0} for _ in individual_messages]
 
@@ -65,24 +84,62 @@ async def process_news():
         result = (
             similarity_results[idx] if idx < len(similarity_results) else {"already_sent": False, "max_similarity": 0.0}
         )
-        if result.get("already_sent") and result.get("max_similarity", 0) >= 0.8:
-            logger.info("유사한 메시지가 이미 전송되어 스킵합니다.")
+        if result.get("already_sent") and result.get("max_similarity", 0) >= SIMILARITY_THRESHOLD:
+            logger.info("Skipping similar message that was already sent")
             continue
         try:
             await send_message_to_channel(msg)
-            logger.info("개별 뉴스 메시지 전송 완료")
+            logger.info("Individual news message sent successfully")
             store_channel_message(msg)
         except Exception as e:
-            logger.error(f"채널 메시지 전송 오류: {e}")
+            logger.error(f"Error sending channel message: {e}")
 
-    logger.info("process_news 완료")
+    logger.info("News processing completed")
+
+
+async def shutdown(signal, loop):
+    """
+    Clean up resources when application is shutting down.
+
+    Args:
+        signal: Signal that triggered shutdown
+        loop: Event loop to stop
+    """
+    logger.info(f"Received {signal.name} signal, shutting down...")
+
+    # Cancel all running tasks
+    tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
+    for task in tasks:
+        task.cancel()
+
+    await asyncio.gather(*tasks, return_exceptions=True)
+
+    # Close async session
+    await close_session()
+
+    # Stop event loop
+    loop.stop()
+    logger.info("Shutdown completed successfully")
 
 
 def main():
+    """
+    Main application entry point.
+
+    Sets up the Telegram bot, job queue, and signal handlers.
+    """
     app = create_application()
-    # SCRAPE_INTERVAL마다 process_news 작업 실행 (첫 실행은 10초 후)
-    app.job_queue.run_repeating(lambda context: asyncio.create_task(process_news()), interval=SCRAPE_INTERVAL, first=10)
-    # Polling 대신 웹훅 방식으로 실행
+    # Run process_news on SCRAPE_INTERVAL with initial delay
+    app.job_queue.run_repeating(
+        lambda context: asyncio.create_task(process_news()), interval=SCRAPE_INTERVAL, first=FIRST_SCRAPE_DELAY
+    )
+
+    # Register signal handlers for graceful shutdown
+    loop = asyncio.get_event_loop()
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        loop.add_signal_handler(sig, lambda s=sig: asyncio.create_task(shutdown(s, loop)))
+
+    # Run webhook instead of polling
     run_webhook(app)
 
 

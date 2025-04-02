@@ -3,7 +3,7 @@ import pytest
 from telegram_bot import message_sender
 
 
-# Fake Bot 클래스
+# Fake Bot class
 class FakeBot:
     def __init__(self, token):
         self.token = token

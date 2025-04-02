@@ -278,6 +278,21 @@ CATEGORY_FIELD_INFO = {
 
 
 def format_detailed_message(news_categories: dict, news_type: str, language="ko", url_mapping: dict = None) -> list:
+    """
+    Format news articles into detailed Telegram messages.
+
+    Takes categorized news data and formats individual detailed messages for each news item,
+    preserving the original language formatting based on the language parameter.
+
+    Args:
+        news_categories: Dictionary with category keys and lists of news items
+        news_type: Type of news ("domestic" or "international")
+        language: Language code for formatting (default: "ko" for Korean)
+        url_mapping: Optional mapping of titles to URLs for citation links
+
+    Returns:
+        List of formatted message strings ready to send via Telegram
+    """
     messages = []
     for cat_key, news_list in news_categories.items():
         if cat_key not in CATEGORY_FIELD_INFO:
@@ -299,6 +314,7 @@ def format_detailed_message(news_categories: dict, news_type: str, language="ko"
             trust_reason = item.get("trust_reason", "").strip()
             title = item.get("title", "").strip()
 
+            # Process citation links
             citations = []
             if "urls" in item and isinstance(item["urls"], list) and item["urls"]:
                 citations = [{"url": url, "title": "인용 기사"} for url in item["urls"]]
@@ -328,6 +344,7 @@ def format_detailed_message(news_categories: dict, news_type: str, language="ko"
             if not citations:
                 citations = [{"url": item.get("url", "#"), "title": "인용 기사"}]
 
+            # Get primary citation link for the header
             if isinstance(citations, list) and len(citations) > 0:
                 first_cit = citations[0]
                 if isinstance(first_cit, dict) and "url" in first_cit:
@@ -339,6 +356,7 @@ def format_detailed_message(news_categories: dict, news_type: str, language="ko"
             else:
                 citation_header_link = item.get("url", "#")
 
+            # Process additional citation links
             additional_citations = []
             if isinstance(citations, list) and len(citations) > 1:
                 for cit in citations[1:3]:
@@ -352,6 +370,7 @@ def format_detailed_message(news_categories: dict, news_type: str, language="ko"
                         continue
                     additional_citations.append(f"<a href='{link_cit}'>{title_cit}</a>")
 
+            # Format message components
             header = f"{info['emoji']} <a href='{citation_header_link}'><b>[{'국내' if news_type=='domestic' else '해외'}] {info['display']} 뉴스 - {title}</b></a>"
             detail_lines = []
             for field_key, label in info["fields"].items():
@@ -366,6 +385,8 @@ def format_detailed_message(news_categories: dict, news_type: str, language="ko"
             citation_lines = ""
             if additional_citations:
                 citation_lines = "<b>인용 기사:</b> " + " | ".join(additional_citations)
+
+            # Combine message components
             full_message = (
                 header
                 + details

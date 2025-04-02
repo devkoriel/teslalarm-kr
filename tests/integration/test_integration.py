@@ -3,7 +3,7 @@ import pytest
 from run import process_news
 
 
-# 더미 함수들: 실제 외부 API 호출 대신 고정된 값을 반환
+# Dummy functions: Return fixed values instead of actual external API calls
 def dummy_collect_domestic_news():
     return [
         {

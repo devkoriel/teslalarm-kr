@@ -10,8 +10,8 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     username = Column(String, unique=True)
     language = Column(String(2), default="ko")
-    keywords = Column(JSON, default=[])  # 관심 키워드 목록
-    notify_times = Column(JSON, default=[])  # 알림 시간대 (예: ["09:00", "17:00"])
+    keywords = Column(JSON, default=[])  # List of interest keywords
+    notify_times = Column(JSON, default=[])  # Notification time ranges (e.g., ["09:00", "17:00"])
     notify_frequency = Column(Integer, default=1)
 
 

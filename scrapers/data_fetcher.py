@@ -22,61 +22,76 @@ logger = setup_logger()
 
 
 def collect_domestic_news():
+    """
+    Collect Tesla-related news from various Korean news sources.
+
+    Aggregates news from multiple sources while handling exceptions for each source
+    independently to ensure overall collection process continues even if individual
+    source scraping fails.
+
+    Returns:
+        List of news item dictionaries with fields:
+        - title: News title
+        - content: News content
+        - url: Source URL
+        - published: Publication date/time
+        - source: News source name
+    """
     news = []
     try:
         news += fetch_naver_news()
     except Exception as e:
-        logger.error(f"네이버 뉴스 수집 오류: {e}")
+        logger.error(f"Naver news collection error: {e}")
     try:
         news += fetch_motorgraph_news()
     except Exception as e:
-        logger.error(f"모터그래프 뉴스 수집 오류: {e}")
+        logger.error(f"Motorgraph news collection error: {e}")
     try:
         news += fetch_auto_danawa_news()
     except Exception as e:
-        logger.error(f"AUTO.DANAWA 뉴스 수집 오류: {e}")
+        logger.error(f"AUTO.DANAWA news collection error: {e}")
     try:
         news += fetch_etnews_news()
     except Exception as e:
-        logger.error(f"전자신문 뉴스 수집 오류: {e}")
+        logger.error(f"ET News collection error: {e}")
     try:
         news += fetch_heraldcorp_news()
     except Exception as e:
-        logger.error(f"헤럴드경제 뉴스 수집 오류: {e}")
+        logger.error(f"Herald Economy news collection error: {e}")
     try:
         news += fetch_donga_news()
     except Exception as e:
-        logger.error(f"동아닷컴 뉴스 수집 오류: {e}")
+        logger.error(f"Donga.com news collection error: {e}")
     try:
         news += fetch_edaily_news()
     except Exception as e:
-        logger.error(f"이데일리 뉴스 수집 오류: {e}")
+        logger.error(f"Edaily news collection error: {e}")
     try:
         news += fetch_chosunbiz_news()
     except Exception as e:
-        logger.error(f"조선비즈 뉴스 수집 오류: {e}")
+        logger.error(f"ChosunBiz news collection error: {e}")
     try:
         news += fetch_autodaily_news()
     except Exception as e:
-        logger.error(f"오토데일리 뉴스 수집 오류: {e}")
+        logger.error(f"AutoDaily news collection error: {e}")
     try:
         news += fetch_itchosun_news()
     except Exception as e:
-        logger.error(f"IT조선 뉴스 수집 오류: {e}")
+        logger.error(f"IT Chosun news collection error: {e}")
     try:
         news += fetch_subsidy_info()
     except Exception as e:
-        logger.error(f"보조금 정보 수집 오류: {e}")
+        logger.error(f"Subsidy information collection error: {e}")
     try:
         news += fetch_tesla_naver_blog()
     except Exception as e:
-        logger.error(f"테슬라 네이버 블로그 수집 오류: {e}")
+        logger.error(f"Tesla Naver Blog collection error: {e}")
     try:
         news += fetch_tesla_clien()
     except Exception as e:
-        logger.error(f"테슬라 클리앙 뉴스 수집 오류: {e}")
+        logger.error(f"Tesla Clien news collection error: {e}")
     try:
         news += fetch_tesla_dcincide()
     except Exception as e:
-        logger.error(f"테슬라 DCinside 뉴스 수집 오류: {e}")
+        logger.error(f"Tesla DCinside news collection error: {e}")
     return news

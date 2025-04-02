@@ -7,17 +7,27 @@ from telegram_bot.user_settings import set_user_language
 
 
 async def change_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # 봇이 보낸 메시지는 무시합니다.
+    """
+    Handle the /language command to change user language preference.
+
+    Only admin users can change language settings. Supports 'ko' for Korean
+    and 'en' for English.
+
+    Args:
+        update: Telegram update object
+        context: Telegram context with command arguments
+    """
+    # Ignore messages from bots
     if update.effective_user and update.effective_user.is_bot:
         return
 
     user = update.effective_user
     if not user:
-        return  # 사용자 정보가 없으면 무시
+        return  # Ignore if no user information
 
     user_id = user.id
 
-    # 관리자 여부 확인
+    # Check if user is admin
     if user_id not in BOT_ADMIN_IDS:
         reply = "이 명령어를 사용할 권한이 없습니다."
         await send_message_to_user(user_id, reply)
@@ -37,7 +47,16 @@ async def change_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # 봇이 보낸 메시지는 무시합니다.
+    """
+    Handle regular text messages sent to the bot.
+
+    Responds with instructions about available commands.
+
+    Args:
+        update: Telegram update object
+        context: Telegram context
+    """
+    # Ignore messages from bots
     if update.effective_user and update.effective_user.is_bot:
         return
 

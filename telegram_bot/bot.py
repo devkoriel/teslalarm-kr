@@ -8,6 +8,14 @@ logger = setup_logger()
 
 
 def create_application():
+    """
+    Create and configure the Telegram bot application.
+
+    Sets up command and message handlers for the bot.
+
+    Returns:
+        Configured Telegram bot application
+    """
     app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
     app.add_handler(CommandHandler("language", change_language))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
@@ -15,12 +23,21 @@ def create_application():
 
 
 def run_webhook(app):
-    # 텔레그램 서버에 webhook URL 설정
+    """
+    Run the Telegram bot in webhook mode.
+
+    Configures the webhook URL on Telegram servers and starts
+    the webhook server to receive updates.
+
+    Args:
+        app: Telegram bot application instance
+    """
+    # Set webhook URL on Telegram servers
     app.bot.set_webhook(WEBHOOK_URL)
-    # webhook 방식으로 서버 실행
+    # Run server in webhook mode
     app.run_webhook(
         listen=WEBHOOK_LISTEN,
         port=WEBHOOK_PORT,
-        url_path=TELEGRAM_BOT_TOKEN,  # URL 경로에 봇 토큰 사용
+        url_path=TELEGRAM_BOT_TOKEN,  # Use bot token in URL path
         webhook_url=WEBHOOK_URL,
     )

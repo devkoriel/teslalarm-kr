@@ -9,10 +9,22 @@ logger = setup_logger()
 
 
 def get_db_connection():
+    """
+    Create and return a PostgreSQL database connection.
+
+    Returns:
+        psycopg2 connection object
+    """
     return psycopg2.connect(DATABASE_URL)
 
 
 def initialize_table():
+    """
+    Initialize the user_settings table in the database if it doesn't exist.
+
+    Creates a table with columns for user_id, preferred language, keywords,
+    notification times, and notification frequency.
+    """
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute(
@@ -32,6 +44,16 @@ def initialize_table():
 
 
 def set_user_language(user_id, lang_code):
+    """
+    Set or update a user's preferred language.
+
+    Args:
+        user_id: Telegram user ID
+        lang_code: Language code (e.g., 'ko', 'en')
+
+    Returns:
+        True if operation was successful
+    """
     initialize_table()
     conn = get_db_connection()
     cur = conn.cursor()
@@ -50,6 +72,15 @@ def set_user_language(user_id, lang_code):
 
 
 def get_user_language(user_id):
+    """
+    Get a user's preferred language setting.
+
+    Args:
+        user_id: Telegram user ID
+
+    Returns:
+        Language code string (defaults to 'ko' if not found)
+    """
     initialize_table()
     conn = get_db_connection()
     cur = conn.cursor()
@@ -61,6 +92,16 @@ def get_user_language(user_id):
 
 
 def set_user_keywords(user_id, keywords: list):
+    """
+    Set or update a user's keyword list.
+
+    Args:
+        user_id: Telegram user ID
+        keywords: List of keyword strings
+
+    Returns:
+        True if operation was successful
+    """
     initialize_table()
     conn = get_db_connection()
     cur = conn.cursor()
@@ -80,6 +121,15 @@ def set_user_keywords(user_id, keywords: list):
 
 
 def get_user_keywords(user_id):
+    """
+    Get a user's keyword list.
+
+    Args:
+        user_id: Telegram user ID
+
+    Returns:
+        List of keyword strings (empty list if not found)
+    """
     initialize_table()
     conn = get_db_connection()
     cur = conn.cursor()
@@ -90,12 +140,17 @@ def get_user_keywords(user_id):
     try:
         return json.loads(result[0]) if result and result[0] else []
     except Exception as e:
-        logger.error(f"키워드 파싱 오류: {e}")
+        logger.error(f"Error parsing keywords: {e}")
         return []
 
 
 def get_all_user_settings():
-    """모든 사용자 설정을 가져오는 함수 (user_id, preferred_lang, keywords)."""
+    """
+    Get settings for all users in the database.
+
+    Returns:
+        List of dictionaries containing user_id, language, and keywords for each user
+    """
     initialize_table()
     conn = get_db_connection()
     cur = conn.cursor()
@@ -108,7 +163,7 @@ def get_all_user_settings():
         try:
             keywords = json.loads(keywords_json) if keywords_json else []
         except Exception as e:
-            logger.error(f"키워드 파싱 오류: {e}")
+            logger.error(f"Error parsing keywords: {e}")
             keywords = []
         users.append({"user_id": user_id, "language": preferred_lang, "keywords": keywords})
     return users

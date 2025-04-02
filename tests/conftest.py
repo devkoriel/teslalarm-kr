@@ -1,5 +1,5 @@
 # tests/conftest.py
 from dotenv import load_dotenv
 
-# .env.test 파일의 환경변수를 로드 (파일이 없으면 무시됨)
+# Load environment variables from .env.test file (ignores if file doesn't exist)
 load_dotenv(dotenv_path=".env.test")
