@@ -1,6 +1,9 @@
 import asyncio
+import os
 import signal
 from typing import Any, Dict, List
+
+import uvicorn
 
 from analyzers.trust_evaluator import estimate_optimal_batch_size
 from config import DEFAULT_LANGUAGE, FIRST_SCRAPE_DELAY, SCRAPE_INTERVAL, SIMILARITY_THRESHOLD
@@ -10,6 +13,10 @@ from telegram_bot.message_formatter import format_detailed_message
 from utils.async_utils import close_session
 from utils.cache import get_channel_messages, is_duplicate, store_channel_message
 from utils.logger import setup_logger
+from web.app import app as web_app
+
+# 텔레그램 채널 URL
+TELEGRAM_CHANNEL_URL = "https://t.me/teslalarmKR"
 
 logger = setup_logger()
 
@@ -232,25 +239,32 @@ async def shutdown(signal, loop):
     logger.info("Shutdown completed successfully")
 
 
-def main():
-    """
-    Main application entry point.
+async def run_webhook_async(app):
+    """비동기로 Telegram webhook 실행"""
+    run_webhook(app)
 
-    Sets up the Telegram bot, job queue, and signal handlers.
+
+async def main():
     """
-    app = create_application()
-    # Run process_news on SCRAPE_INTERVAL with initial delay
-    app.job_queue.run_repeating(
+    Main application entry point with both Telegram bot and web server.
+    """
+    # 텔레그램 봇 설정
+    telegram_app = create_application()
+    telegram_app.job_queue.run_repeating(
         lambda context: asyncio.create_task(process_news()), interval=SCRAPE_INTERVAL, first=FIRST_SCRAPE_DELAY
     )
 
-    # Register signal handlers for graceful shutdown
+    # Web server config
+    config = uvicorn.Config(web_app, host="0.0.0.0", port=int(os.getenv("PORT", 8080)), log_level="info")
+    web_server = uvicorn.Server(config)
+
+    # 시그널 핸들러 설정
     loop = asyncio.get_event_loop()
     for sig in (signal.SIGINT, signal.SIGTERM):
         loop.add_signal_handler(sig, lambda s=sig: asyncio.create_task(shutdown(s, loop)))
 
-    # Run webhook instead of polling
-    run_webhook(app)
+    # 두 서버 동시 실행
+    await asyncio.gather(web_server.serve(), run_webhook_async(telegram_app))
 
 
 if __name__ == "__main__":
@@ -260,4 +274,5 @@ if __name__ == "__main__":
         nest_asyncio.apply()
     except ImportError:
         pass
-    main()
+
+    asyncio.run(main())
