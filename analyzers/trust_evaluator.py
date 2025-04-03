@@ -266,15 +266,15 @@ async def analyze_text_chunk(
                                 ],
                             },
                         },
-                        "new_model": {
+                        "purchase_guide": {
                             "type": "array",
-                            "description": "News about new Tesla vehicle model releases",
+                            "description": "Guides and tips for purchasing Tesla vehicles",
                             "items": {
                                 "type": "object",
                                 "properties": {
-                                    "title": {"type": "string", "description": "News title"},
-                                    "model_name": {"type": "string", "description": "Model name"},
-                                    "release_date": {"type": "string", "description": "Release date"},
+                                    "title": {"type": "string", "description": "Guide title"},
+                                    "model_info": {"type": "string", "description": "Tesla model information"},
+                                    "purchase_tips": {"type": "string", "description": "Purchase tips and advice"},
                                     "details": {"type": "string", "description": "Detailed content"},
                                     "published": {
                                         "type": "string",
@@ -290,8 +290,8 @@ async def analyze_text_chunk(
                                 },
                                 "required": [
                                     "title",
-                                    "model_name",
-                                    "release_date",
+                                    "model_info",
+                                    "purchase_tips",
                                     "details",
                                     "published",
                                     "trust",
@@ -300,15 +300,19 @@ async def analyze_text_chunk(
                                 ],
                             },
                         },
-                        "autonomous_update": {
+                        "test_drive": {
                             "type": "array",
-                            "description": "News about Tesla autonomous driving feature updates",
+                            "description": "Tesla vehicle test drive reviews and experiences",
                             "items": {
                                 "type": "object",
                                 "properties": {
-                                    "title": {"type": "string", "description": "News title"},
-                                    "feature": {"type": "string", "description": "Feature name"},
-                                    "update_details": {"type": "string", "description": "Update details"},
+                                    "title": {"type": "string", "description": "Review title"},
+                                    "model": {"type": "string", "description": "Tesla model tested"},
+                                    "review_highlights": {
+                                        "type": "string",
+                                        "description": "Key highlights of the review",
+                                    },
+                                    "details": {"type": "string", "description": "Detailed content"},
                                     "published": {
                                         "type": "string",
                                         "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
@@ -323,8 +327,76 @@ async def analyze_text_chunk(
                                 },
                                 "required": [
                                     "title",
-                                    "feature",
-                                    "update_details",
+                                    "model",
+                                    "review_highlights",
+                                    "details",
+                                    "published",
+                                    "trust",
+                                    "trust_reason",
+                                    "urls",
+                                ],
+                            },
+                        },
+                        "charging_info": {
+                            "type": "array",
+                            "description": "Information about Tesla charging options, locations, and tips",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "title": {"type": "string", "description": "Information title"},
+                                    "location": {"type": "string", "description": "Charging location information"},
+                                    "charging_details": {"type": "string", "description": "Charging details and tips"},
+                                    "published": {
+                                        "type": "string",
+                                        "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
+                                    },
+                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
+                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
+                                    "urls": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                        "description": "Related URLs (max 3)",
+                                    },
+                                },
+                                "required": [
+                                    "title",
+                                    "location",
+                                    "charging_details",
+                                    "published",
+                                    "trust",
+                                    "trust_reason",
+                                    "urls",
+                                ],
+                            },
+                        },
+                        "supercharger_update": {
+                            "type": "array",
+                            "description": "Updates about Tesla Supercharger network expansion and changes",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "title": {"type": "string", "description": "Update title"},
+                                    "location": {"type": "string", "description": "Supercharger location"},
+                                    "charger_details": {
+                                        "type": "string",
+                                        "description": "Details about the supercharger",
+                                    },
+                                    "published": {
+                                        "type": "string",
+                                        "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
+                                    },
+                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
+                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
+                                    "urls": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                        "description": "Related URLs (max 3)",
+                                    },
+                                },
+                                "required": [
+                                    "title",
+                                    "location",
+                                    "charger_details",
                                     "published",
                                     "trust",
                                     "trust_reason",
@@ -338,9 +410,9 @@ async def analyze_text_chunk(
                             "items": {
                                 "type": "object",
                                 "properties": {
-                                    "title": {"type": "string", "description": "News title"},
-                                    "update_title": {"type": "string", "description": "Update title"},
-                                    "update_details": {"type": "string", "description": "Update details"},
+                                    "title": {"type": "string", "description": "Update title"},
+                                    "update_title": {"type": "string", "description": "Update name/version"},
+                                    "update_details": {"type": "string", "description": "Update details and features"},
                                     "published": {
                                         "type": "string",
                                         "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
@@ -364,16 +436,17 @@ async def analyze_text_chunk(
                                 ],
                             },
                         },
-                        "infrastructure_update": {
+                        "driving_tip": {
                             "type": "array",
-                            "description": "News about Tesla charging infrastructure expansion and service updates",
+                            "description": "Tips and guides for optimizing Tesla vehicle driving and operation",
                             "items": {
                                 "type": "object",
                                 "properties": {
-                                    "title": {"type": "string", "description": "News title"},
-                                    "infrastructure_details": {
+                                    "title": {"type": "string", "description": "Tip title"},
+                                    "tip_details": {"type": "string", "description": "Detailed driving tip"},
+                                    "applicable_models": {
                                         "type": "string",
-                                        "description": "Infrastructure details",
+                                        "description": "Models this tip applies to",
                                     },
                                     "published": {
                                         "type": "string",
@@ -389,7 +462,8 @@ async def analyze_text_chunk(
                                 },
                                 "required": [
                                     "title",
-                                    "infrastructure_details",
+                                    "tip_details",
+                                    "applicable_models",
                                     "published",
                                     "trust",
                                     "trust_reason",
@@ -397,60 +471,21 @@ async def analyze_text_chunk(
                                 ],
                             },
                         },
-                        "battery_update": {
+                        "maintenance_tip": {
                             "type": "array",
-                            "description": "News about Tesla battery and performance innovations",
+                            "description": "Tips and guides for Tesla vehicle maintenance and care",
                             "items": {
                                 "type": "object",
                                 "properties": {
-                                    "title": {"type": "string", "description": "News title"},
-                                    "battery_details": {"type": "string", "description": "Battery details"},
-                                    "published": {
+                                    "title": {"type": "string", "description": "Maintenance tip title"},
+                                    "maintenance_details": {
                                         "type": "string",
-                                        "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
+                                        "description": "Detailed maintenance information",
                                     },
-                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
-                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
-                                    "urls": {
-                                        "type": "array",
-                                        "items": {"type": "string"},
-                                        "description": "Related URLs (max 3)",
-                                    },
-                                },
-                                "required": ["title", "battery_details", "published", "trust", "trust_reason", "urls"],
-                            },
-                        },
-                        "policy_update": {
-                            "type": "array",
-                            "description": "News about government policies and regulations affecting Tesla",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "title": {"type": "string", "description": "News title"},
-                                    "policy_details": {"type": "string", "description": "Policy details"},
-                                    "published": {
+                                    "applicable_models": {
                                         "type": "string",
-                                        "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
+                                        "description": "Models this tip applies to",
                                     },
-                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
-                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
-                                    "urls": {
-                                        "type": "array",
-                                        "items": {"type": "string"},
-                                        "description": "Related URLs (max 3)",
-                                    },
-                                },
-                                "required": ["title", "policy_details", "published", "trust", "trust_reason", "urls"],
-                            },
-                        },
-                        "production_update": {
-                            "type": "array",
-                            "description": "News about Tesla production and supply chain",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "title": {"type": "string", "description": "News title"},
-                                    "production_details": {"type": "string", "description": "Production details"},
                                     "published": {
                                         "type": "string",
                                         "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
@@ -465,364 +500,40 @@ async def analyze_text_chunk(
                                 },
                                 "required": [
                                     "title",
-                                    "production_details",
+                                    "maintenance_details",
+                                    "applicable_models",
                                     "published",
                                     "trust",
                                     "trust_reason",
                                     "urls",
                                 ],
-                            },
-                        },
-                        "stock_update": {
-                            "type": "array",
-                            "description": "News about Tesla stock and investment trends",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "title": {"type": "string", "description": "News title"},
-                                    "stock_details": {"type": "string", "description": "Stock details"},
-                                    "published": {
-                                        "type": "string",
-                                        "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
-                                    },
-                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
-                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
-                                    "urls": {
-                                        "type": "array",
-                                        "items": {"type": "string"},
-                                        "description": "Related URLs (max 3)",
-                                    },
-                                },
-                                "required": ["title", "stock_details", "published", "trust", "trust_reason", "urls"],
-                            },
-                        },
-                        "ceo_statement": {
-                            "type": "array",
-                            "description": "News about statements from Elon Musk or Tesla CEO",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "title": {"type": "string", "description": "News title"},
-                                    "statement_details": {"type": "string", "description": "Statement details"},
-                                    "published": {
-                                        "type": "string",
-                                        "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
-                                    },
-                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
-                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
-                                    "urls": {
-                                        "type": "array",
-                                        "items": {"type": "string"},
-                                        "description": "Related URLs (max 3)",
-                                    },
-                                },
-                                "required": [
-                                    "title",
-                                    "statement_details",
-                                    "published",
-                                    "trust",
-                                    "trust_reason",
-                                    "urls",
-                                ],
-                            },
-                        },
-                        "global_trend": {
-                            "type": "array",
-                            "description": "News about global Tesla trends",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "title": {"type": "string", "description": "News title"},
-                                    "trend_details": {"type": "string", "description": "Trend details"},
-                                    "published": {
-                                        "type": "string",
-                                        "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
-                                    },
-                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
-                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
-                                    "urls": {
-                                        "type": "array",
-                                        "items": {"type": "string"},
-                                        "description": "Related URLs (max 3)",
-                                    },
-                                },
-                                "required": ["title", "trend_details", "published", "trust", "trust_reason", "urls"],
-                            },
-                        },
-                        "service_update": {
-                            "type": "array",
-                            "description": "News about Tesla service and customer experience",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "title": {"type": "string", "description": "News title"},
-                                    "service_details": {"type": "string", "description": "Service details"},
-                                    "published": {
-                                        "type": "string",
-                                        "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
-                                    },
-                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
-                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
-                                    "urls": {
-                                        "type": "array",
-                                        "items": {"type": "string"},
-                                        "description": "Related URLs (max 3)",
-                                    },
-                                },
-                                "required": ["title", "service_details", "published", "trust", "trust_reason", "urls"],
-                            },
-                        },
-                        "legal_update": {
-                            "type": "array",
-                            "description": "News about Tesla legal matters and lawsuits",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "title": {"type": "string", "description": "News title"},
-                                    "legal_details": {"type": "string", "description": "Legal details"},
-                                    "published": {
-                                        "type": "string",
-                                        "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
-                                    },
-                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
-                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
-                                    "urls": {
-                                        "type": "array",
-                                        "items": {"type": "string"},
-                                        "description": "Related URLs (max 3)",
-                                    },
-                                },
-                                "required": ["title", "legal_details", "published", "trust", "trust_reason", "urls"],
-                            },
-                        },
-                        "event_update": {
-                            "type": "array",
-                            "description": "News about Tesla events and fan meetups",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "title": {"type": "string", "description": "News title"},
-                                    "event_details": {"type": "string", "description": "Event details"},
-                                    "published": {
-                                        "type": "string",
-                                        "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
-                                    },
-                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
-                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
-                                    "urls": {
-                                        "type": "array",
-                                        "items": {"type": "string"},
-                                        "description": "Related URLs (max 3)",
-                                    },
-                                },
-                                "required": ["title", "event_details", "published", "trust", "trust_reason", "urls"],
-                            },
-                        },
-                        "security_update": {
-                            "type": "array",
-                            "description": "News about Tesla technology and cybersecurity issues",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "title": {"type": "string", "description": "News title"},
-                                    "security_details": {"type": "string", "description": "Security details"},
-                                    "published": {
-                                        "type": "string",
-                                        "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
-                                    },
-                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
-                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
-                                    "urls": {
-                                        "type": "array",
-                                        "items": {"type": "string"},
-                                        "description": "Related URLs (max 3)",
-                                    },
-                                },
-                                "required": ["title", "security_details", "published", "trust", "trust_reason", "urls"],
-                            },
-                        },
-                        "comparison_update": {
-                            "type": "array",
-                            "description": "News comparing Tesla with competitors",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "title": {"type": "string", "description": "News title"},
-                                    "comparison_details": {"type": "string", "description": "Comparison details"},
-                                    "published": {
-                                        "type": "string",
-                                        "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
-                                    },
-                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
-                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
-                                    "urls": {
-                                        "type": "array",
-                                        "items": {"type": "string"},
-                                        "description": "Related URLs (max 3)",
-                                    },
-                                },
-                                "required": [
-                                    "title",
-                                    "comparison_details",
-                                    "published",
-                                    "trust",
-                                    "trust_reason",
-                                    "urls",
-                                ],
-                            },
-                        },
-                        "mobility_update": {
-                            "type": "array",
-                            "description": "News about future mobility, robotaxi, Cybertruck, etc.",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "title": {"type": "string", "description": "News title"},
-                                    "mobility_details": {"type": "string", "description": "Mobility details"},
-                                    "published": {
-                                        "type": "string",
-                                        "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
-                                    },
-                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
-                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
-                                    "urls": {
-                                        "type": "array",
-                                        "items": {"type": "string"},
-                                        "description": "Related URLs (max 3)",
-                                    },
-                                },
-                                "required": ["title", "mobility_details", "published", "trust", "trust_reason", "urls"],
-                            },
-                        },
-                        "marketing_update": {
-                            "type": "array",
-                            "description": "News about Tesla brand image and marketing strategy",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "title": {"type": "string", "description": "News title"},
-                                    "marketing_details": {"type": "string", "description": "Marketing details"},
-                                    "published": {
-                                        "type": "string",
-                                        "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
-                                    },
-                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
-                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
-                                    "urls": {
-                                        "type": "array",
-                                        "items": {"type": "string"},
-                                        "description": "Related URLs (max 3)",
-                                    },
-                                },
-                                "required": [
-                                    "title",
-                                    "marketing_details",
-                                    "published",
-                                    "trust",
-                                    "trust_reason",
-                                    "urls",
-                                ],
-                            },
-                        },
-                        "strategy_update": {
-                            "type": "array",
-                            "description": "News about Tesla acquisitions and corporate strategy",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "title": {"type": "string", "description": "News title"},
-                                    "strategy_details": {"type": "string", "description": "Strategy details"},
-                                    "published": {
-                                        "type": "string",
-                                        "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
-                                    },
-                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
-                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
-                                    "urls": {
-                                        "type": "array",
-                                        "items": {"type": "string"},
-                                        "description": "Related URLs (max 3)",
-                                    },
-                                },
-                                "required": ["title", "strategy_details", "published", "trust", "trust_reason", "urls"],
-                            },
-                        },
-                        "community_update": {
-                            "type": "array",
-                            "description": "News about Tesla fan communities and social media trends",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "title": {"type": "string", "description": "News title"},
-                                    "community_details": {"type": "string", "description": "Community details"},
-                                    "published": {
-                                        "type": "string",
-                                        "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
-                                    },
-                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
-                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
-                                    "urls": {
-                                        "type": "array",
-                                        "items": {"type": "string"},
-                                        "description": "Related URLs (max 3)",
-                                    },
-                                },
-                                "required": [
-                                    "title",
-                                    "community_details",
-                                    "published",
-                                    "trust",
-                                    "trust_reason",
-                                    "urls",
-                                ],
-                            },
-                        },
-                        "analysis_update": {
-                            "type": "array",
-                            "description": "Economic, financial and industry analysis related to Tesla",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "title": {"type": "string", "description": "News title"},
-                                    "analysis_details": {"type": "string", "description": "Analysis details"},
-                                    "published": {
-                                        "type": "string",
-                                        "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
-                                    },
-                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
-                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
-                                    "urls": {
-                                        "type": "array",
-                                        "items": {"type": "string"},
-                                        "description": "Related URLs (max 3)",
-                                    },
-                                },
-                                "required": ["title", "analysis_details", "published", "trust", "trust_reason", "urls"],
                             },
                         },
                         "subsidy_info": {
                             "type": "array",
-                            "description": "Information about Tesla purchase subsidies",
+                            "description": "Information about government subsidies and incentives for Tesla vehicles",
                             "items": {
                                 "type": "object",
                                 "properties": {
-                                    "title": {"type": "string", "description": "Information title"},
-                                    "year": {"type": "string", "description": "Year (must include year suffix)"},
-                                    "model": {"type": "string", "description": "Vehicle model"},
-                                    "area": {"type": "string", "description": "Region name"},
-                                    "city": {"type": "string", "description": "City name"},
+                                    "title": {"type": "string", "description": "Subsidy information title"},
+                                    "year": {"type": "string", "description": "Year of subsidy program"},
+                                    "model": {"type": "string", "description": "Tesla model name"},
+                                    "area": {"type": "string", "description": "Region/area (e.g., Seoul)"},
+                                    "city": {"type": "string", "description": "City/district"},
                                     "expected_price": {
                                         "type": "string",
-                                        "description": "Expected price (must include price unit suffix and commas for thousands)",
+                                        "description": "Expected purchase price after subsidy",
                                     },
                                     "subsidy_details": {
                                         "type": "string",
-                                        "description": "Subsidy details (information about checking subsidy details for areas outside Seoul)",
+                                        "description": "Detailed subsidy information",
                                     },
                                     "published": {
                                         "type": "string",
                                         "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
                                     },
+                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
+                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
                                     "urls": {
                                         "type": "array",
                                         "items": {"type": "string"},
@@ -838,33 +549,320 @@ async def analyze_text_chunk(
                                     "expected_price",
                                     "subsidy_details",
                                     "published",
+                                    "trust",
+                                    "trust_reason",
+                                    "urls",
+                                ],
+                            },
+                        },
+                        "model3_info": {
+                            "type": "array",
+                            "description": "Specific information and updates about Tesla Model 3",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "title": {"type": "string", "description": "Information title"},
+                                    "specific_info": {"type": "string", "description": "Model 3 specific information"},
+                                    "details": {"type": "string", "description": "Detailed content"},
+                                    "published": {
+                                        "type": "string",
+                                        "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
+                                    },
+                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
+                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
+                                    "urls": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                        "description": "Related URLs (max 3)",
+                                    },
+                                },
+                                "required": [
+                                    "title",
+                                    "specific_info",
+                                    "details",
+                                    "published",
+                                    "trust",
+                                    "trust_reason",
+                                    "urls",
+                                ],
+                            },
+                        },
+                        "modelY_info": {
+                            "type": "array",
+                            "description": "Specific information and updates about Tesla Model Y",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "title": {"type": "string", "description": "Information title"},
+                                    "specific_info": {"type": "string", "description": "Model Y specific information"},
+                                    "details": {"type": "string", "description": "Detailed content"},
+                                    "published": {
+                                        "type": "string",
+                                        "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
+                                    },
+                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
+                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
+                                    "urls": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                        "description": "Related URLs (max 3)",
+                                    },
+                                },
+                                "required": [
+                                    "title",
+                                    "specific_info",
+                                    "details",
+                                    "published",
+                                    "trust",
+                                    "trust_reason",
+                                    "urls",
+                                ],
+                            },
+                        },
+                        "modelS_info": {
+                            "type": "array",
+                            "description": "Specific information and updates about Tesla Model S",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "title": {"type": "string", "description": "Information title"},
+                                    "specific_info": {"type": "string", "description": "Model S specific information"},
+                                    "details": {"type": "string", "description": "Detailed content"},
+                                    "published": {
+                                        "type": "string",
+                                        "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
+                                    },
+                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
+                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
+                                    "urls": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                        "description": "Related URLs (max 3)",
+                                    },
+                                },
+                                "required": [
+                                    "title",
+                                    "specific_info",
+                                    "details",
+                                    "published",
+                                    "trust",
+                                    "trust_reason",
+                                    "urls",
+                                ],
+                            },
+                        },
+                        "modelX_info": {
+                            "type": "array",
+                            "description": "Specific information and updates about Tesla Model X",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "title": {"type": "string", "description": "Information title"},
+                                    "specific_info": {"type": "string", "description": "Model X specific information"},
+                                    "details": {"type": "string", "description": "Detailed content"},
+                                    "published": {
+                                        "type": "string",
+                                        "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
+                                    },
+                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
+                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
+                                    "urls": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                        "description": "Related URLs (max 3)",
+                                    },
+                                },
+                                "required": [
+                                    "title",
+                                    "specific_info",
+                                    "details",
+                                    "published",
+                                    "trust",
+                                    "trust_reason",
+                                    "urls",
+                                ],
+                            },
+                        },
+                        "cybertruck_info": {
+                            "type": "array",
+                            "description": "Specific information and updates about Tesla Cybertruck",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "title": {"type": "string", "description": "Information title"},
+                                    "specific_info": {
+                                        "type": "string",
+                                        "description": "Cybertruck specific information",
+                                    },
+                                    "details": {"type": "string", "description": "Detailed content"},
+                                    "published": {
+                                        "type": "string",
+                                        "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
+                                    },
+                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
+                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
+                                    "urls": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                        "description": "Related URLs (max 3)",
+                                    },
+                                },
+                                "required": [
+                                    "title",
+                                    "specific_info",
+                                    "details",
+                                    "published",
+                                    "trust",
+                                    "trust_reason",
+                                    "urls",
+                                ],
+                            },
+                        },
+                        "feature_how_to": {
+                            "type": "array",
+                            "description": "How-to guides for using Tesla vehicle features",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "title": {"type": "string", "description": "Guide title"},
+                                    "feature_name": {"type": "string", "description": "Name of the feature"},
+                                    "how_to_details": {"type": "string", "description": "Detailed usage instructions"},
+                                    "published": {
+                                        "type": "string",
+                                        "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
+                                    },
+                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
+                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
+                                    "urls": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                        "description": "Related URLs (max 3)",
+                                    },
+                                },
+                                "required": [
+                                    "title",
+                                    "feature_name",
+                                    "how_to_details",
+                                    "published",
+                                    "trust",
+                                    "trust_reason",
+                                    "urls",
+                                ],
+                            },
+                        },
+                        "service_center": {
+                            "type": "array",
+                            "description": "Information about Tesla service centers and service experiences",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "title": {"type": "string", "description": "Information title"},
+                                    "location": {"type": "string", "description": "Service center location"},
+                                    "service_details": {"type": "string", "description": "Service information details"},
+                                    "published": {
+                                        "type": "string",
+                                        "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
+                                    },
+                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
+                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
+                                    "urls": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                        "description": "Related URLs (max 3)",
+                                    },
+                                },
+                                "required": [
+                                    "title",
+                                    "location",
+                                    "service_details",
+                                    "published",
+                                    "trust",
+                                    "trust_reason",
+                                    "urls",
+                                ],
+                            },
+                        },
+                        "accessory_info": {
+                            "type": "array",
+                            "description": "Information about Tesla accessories and compatible 3rd party products",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "title": {"type": "string", "description": "Information title"},
+                                    "accessory_details": {"type": "string", "description": "Accessory information"},
+                                    "applicable_models": {"type": "string", "description": "Compatible Tesla models"},
+                                    "published": {
+                                        "type": "string",
+                                        "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
+                                    },
+                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
+                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
+                                    "urls": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                        "description": "Related URLs (max 3)",
+                                    },
+                                },
+                                "required": [
+                                    "title",
+                                    "accessory_details",
+                                    "applicable_models",
+                                    "published",
+                                    "trust",
+                                    "trust_reason",
+                                    "urls",
+                                ],
+                            },
+                        },
+                        "owner_experience": {
+                            "type": "array",
+                            "description": "Experiences and stories from Tesla vehicle owners",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "title": {"type": "string", "description": "Experience title"},
+                                    "experience_details": {
+                                        "type": "string",
+                                        "description": "Detailed owner experience",
+                                    },
+                                    "model": {"type": "string", "description": "Tesla model related to the experience"},
+                                    "published": {
+                                        "type": "string",
+                                        "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
+                                    },
+                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
+                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
+                                    "urls": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                        "description": "Related URLs (max 3)",
+                                    },
+                                },
+                                "required": [
+                                    "title",
+                                    "experience_details",
+                                    "model",
+                                    "published",
+                                    "trust",
+                                    "trust_reason",
                                     "urls",
                                 ],
                             },
                         },
                         "useful_info": {
                             "type": "array",
-                            "description": "Useful Tesla information (purchases, discounts, loans, subsidies, useful products, reviews, etc.)",
+                            "description": "General useful information for Tesla owners and potential buyers",
                             "items": {
                                 "type": "object",
                                 "properties": {
                                     "title": {"type": "string", "description": "Information title"},
-                                    "useful_info_details": {
-                                        "type": "string",
-                                        "description": "Useful information details",
-                                    },
+                                    "useful_info_details": {"type": "string", "description": "Detailed content"},
                                     "published": {
                                         "type": "string",
                                         "description": "Publication date/time (YYYY-MM-DD HH:MM format)",
                                     },
-                                    "content_quality": {
-                                        "type": "number",
-                                        "description": "Quality score (0-1) indicating genuineness and value of the information",
-                                    },
-                                    "quality_reasoning": {
-                                        "type": "string",
-                                        "description": "Explanation of why the content is high-quality, genuine information",
-                                    },
+                                    "trust": {"type": "number", "description": "Trustworthiness score (0-1 value)"},
+                                    "trust_reason": {"type": "string", "description": "Reasoning for trust score"},
                                     "urls": {
                                         "type": "array",
                                         "items": {"type": "string"},
@@ -875,16 +873,15 @@ async def analyze_text_chunk(
                                     "title",
                                     "useful_info_details",
                                     "published",
-                                    "content_quality",
-                                    "quality_reasoning",
+                                    "trust",
+                                    "trust_reason",
                                     "urls",
                                 ],
                             },
                         },
                     },
-                    "required": [],
+                    "additionalProperties": False,
                 },
-                "strict": False,
             },
         }
     ]
@@ -904,7 +901,8 @@ Analysis guidelines:
 8. Always append year suffix to subsidy_info[].year
 9. Always append price unit suffix to subsidy_info[].expected_price and include commas for thousands.
 10. For useful information, include only purchase tips, discounts, financing, subsidies, useful products/accessories, reviews, and helpful information - exclude advertisements, promotions, stock-related posts, or simple questions.
-11. Format the response in {language}.
+11. CRITICAL: Due to users' busy schedules, apply extremely strict filtering. Only include content that is absolutely essential, can't-miss information for Tesla owners, prospective owners, and fans. Filter out everything except truly critical and highly valuable information.
+12. Format the response in {language}.
 
 Here is the news and information content to analyze:
 
@@ -941,7 +939,8 @@ Analysis guidelines:
     - Content created by sellers to promote their products
     - Content with excessive self-promotion
     - Low effort, generic, or superficial information
-14. Format the response in {language}.
+14. CRITICAL: Due to users' busy schedules, apply the most rigorous filtering possible. Only include content that is absolutely essential, can't-miss information for Tesla owners, prospective owners, and fans. Filter out everything except truly critical and highly valuable information.
+15. Format the response in {language}.
 
 Here is the information content to analyze with strict quality filtering:
 
@@ -1010,9 +1009,9 @@ async def analyze_and_extract_fields(consolidated_text: str, language: str = "ko
 
     # Create sample template based on content type for token calculation
     if is_info_content:
-        template = "I'm providing Tesla informational content from community sources and blogs in Korean for analysis.\n\nAnalysis guidelines:\n1. Include only Tesla information relevant to the Korean market.\n2. All publication timestamps must use 'YYYY-MM-DD HH:MM' format.\n3. Include up to 3 most relevant and reliable URLs for each information item, sorted by relevance.\n4. CRITICAL: Apply extremely strict quality filters - ONLY include content that is 100% high-quality and genuinely useful.\n5. ONLY include content that was created with sincere intent to help others - reject ANY content that has promotional, marketing, or advertising elements.\n6. Assign a content_quality score (0-1) to each useful_info item:\n   - Score 1.0 only if the content is exceptional, clearly authentic, and provides significant value\n   - Scores below 0.8 should not be included at all - better to reject than include low-quality content\n7. Provide detailed quality_reasoning explaining why you believe the content is genuine, sincere, and valuable\n8. Categorize tesla subsidy information and details as subsidy_info\n9. For subsidy_details, always use information about checking subsidy details for areas outside Seoul.\n10. Always append year suffix to subsidy_info[].year\n11. Always append price unit suffix to subsidy_info[].expected_price and include commas for thousands.\n12. For useful_info, ONLY include high-quality, non-promotional content about:\n    - Purchase tips and recommendations from actual owners\n    - Genuine reviews from real users\n    - Actual user experiences and advice\n    - Helpful guides written by community members with no commercial interest\n13. Reject content that is:\n    - Created by dealers or businesses to attract customers\n    - Disguised advertisements or promotions\n    - Affiliate marketing or commission-based recommendations\n    - Content created by sellers to promote their products\n    - Content with excessive self-promotion\n    - Low effort, generic, or superficial information\n14. Format the response in {language}.\n\nHere is the information content to analyze with strict quality filtering:\n\n"
+        template = "I'm providing Tesla informational content from community sources and blogs in Korean for analysis.\n\nAnalysis guidelines:\n1. Include only Tesla information relevant to the Korean market.\n2. All publication timestamps must use 'YYYY-MM-DD HH:MM' format.\n3. Include up to 3 most relevant and reliable URLs for each information item, sorted by relevance.\n4. CRITICAL: Apply extremely strict quality filters - ONLY include content that is 100% high-quality and genuinely useful.\n5. ONLY include content that was created with sincere intent to help others - reject ANY content that has promotional, marketing, or advertising elements.\n6. Assign a content_quality score (0-1) to each useful_info item:\n   - Score 1.0 only if the content is exceptional, clearly authentic, and provides significant value\n   - Scores below 0.8 should not be included at all - better to reject than include low-quality content\n7. Provide detailed quality_reasoning explaining why you believe the content is genuine, sincere, and valuable\n8. Categorize tesla subsidy information and details as subsidy_info\n9. For subsidy_details, always use information about checking subsidy details for areas outside Seoul.\n10. Always append year suffix to subsidy_info[].year\n11. Always append price unit suffix to subsidy_info[].expected_price and include commas for thousands.\n12. For useful_info, ONLY include high-quality, non-promotional content about:\n    - Purchase tips and recommendations from actual owners\n    - Genuine reviews from real users\n    - Actual user experiences and advice\n    - Helpful guides written by community members with no commercial interest\n13. Reject content that is:\n    - Created by dealers or businesses to attract customers\n    - Disguised advertisements or promotions\n    - Affiliate marketing or commission-based recommendations\n    - Content created by sellers to promote their products\n    - Content with excessive self-promotion\n    - Low effort, generic, or superficial information\n14. CRITICAL: Due to users' busy schedules, apply the most rigorous filtering possible. Only include content that is absolutely essential, can't-miss information for Tesla owners, prospective owners, and fans. Filter out everything except truly critical and highly valuable information.\n15. Format the response in {language}.\n\nHere is the information content to analyze with strict quality filtering:\n\n"
     else:
-        template = "I'm providing Tesla news and informational content in Korean for analysis.\n\nAnalysis guidelines:\n1. Include only Tesla news relevant to the Korean market.\n2. For vehicle price categories, include trim-specific pricing when available.\n3. For new model news, you must specify the release date of the new model.\n4. All publication timestamps must use 'YYYY-MM-DD HH:MM' format.\n5. Include up to 3 most relevant and reliable URLs for each news item, sorted by relevance.\n6. Categorize subsidy information and useful tips as informational content, not news.\n7. For subsidy_details, always use information about checking subsidy details for areas outside Seoul.\n8. Always append year suffix to subsidy_info[].year\n9. Always append price unit suffix to subsidy_info[].expected_price and include commas for thousands.\n10. For useful information, include only purchase tips, discounts, financing, subsidies, useful products/accessories, reviews, and helpful information - exclude advertisements, promotions, stock-related posts, or simple questions.\n11. Format the response in {language}.\n\nHere is the news and information content to analyze:\n\n"
+        template = "I'm providing Tesla news and informational content in Korean for analysis.\n\nAnalysis guidelines:\n1. Include only Tesla news relevant to the Korean market.\n2. For vehicle price categories, include trim-specific pricing when available.\n3. For new model news, you must specify the release date of the new model.\n4. All publication timestamps must use 'YYYY-MM-DD HH:MM' format.\n5. Include up to 3 most relevant and reliable URLs for each news item, sorted by relevance.\n6. Categorize subsidy information and useful tips as informational content, not news.\n7. For subsidy_details, always use information about checking subsidy details for areas outside Seoul.\n8. Always append year suffix to subsidy_info[].year\n9. Always append price unit suffix to subsidy_info[].expected_price and include commas for thousands.\n10. For useful information, include only purchase tips, discounts, financing, subsidies, useful products/accessories, reviews, and helpful information - exclude advertisements, promotions, stock-related posts, or simple questions.\n11. CRITICAL: Due to users' busy schedules, apply extremely strict filtering. Only include content that is absolutely essential, can't-miss information for Tesla owners, prospective owners, and fans. Filter out everything except truly critical and highly valuable information.\n12. Format the response in {language}.\n\nHere is the news and information content to analyze:\n\n"
 
     user_message_template_tokens = count_tokens(template, model=OPENAI_MODEL)
 

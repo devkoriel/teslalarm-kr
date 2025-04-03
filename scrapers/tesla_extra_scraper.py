@@ -210,7 +210,7 @@ def fetch_subsidy_info():
         return []
 
 
-def fetch_tesla_naver_blog():
+def fetch_tesla_naver_blog(search_keyword="테슬라"):
     """
     Fetch Tesla-related posts from Naver Blog search results.
 
@@ -218,6 +218,9 @@ def fetch_tesla_naver_blog():
     1. Uses Naver Open API to get blog search results as JSON
     2. Extracts post link, title, author, date, etc. from the JSON response
     3. Processes each post's information into a dictionary
+
+    Args:
+        search_keyword: Keyword to search for (default: "테슬라")
 
     Returns:
         List of dictionaries containing blog post information with fields:
@@ -232,7 +235,7 @@ def fetch_tesla_naver_blog():
         items = []
         try:
             # Call OpenAPI URL (URL-encode the search query)
-            search_query = quote("테슬라")
+            search_query = quote(search_keyword)
             url = f"https://openapi.naver.com/v1/search/blog?query={search_query}&display=30&start=1&sort=sim"
             status, res_text = pycurl_get(url, headers=NAVER_BLOG_HEADERS, timeout=10)
             if status != 200:
@@ -274,7 +277,7 @@ def fetch_tesla_naver_blog():
         return []
 
 
-def fetch_tesla_clien():
+def fetch_tesla_clien(search_keyword="테슬라"):
     """
     Fetch Tesla-related posts from Clien community website.
 
@@ -282,6 +285,9 @@ def fetch_tesla_clien():
     1. Scrapes search results page for Tesla-related content
     2. Extracts post title, URL, author, and publication date
     3. Visits each post URL to fetch full post content
+
+    Args:
+        search_keyword: Keyword to search for (default: "테슬라")
 
     Returns:
         List of dictionaries containing post information with fields:
@@ -295,7 +301,11 @@ def fetch_tesla_clien():
     """
     try:
         items = []
-        search_url = "https://www.clien.net/service/search?q=%ED%85%8C%EC%8A%AC%EB%9D%BC&sort=recency&p=0&boardCd=cm_car&isBoard=true"
+        # URL encode the search query
+        encoded_query = quote(search_keyword)
+        search_url = (
+            f"https://www.clien.net/service/search?q={encoded_query}&sort=recency&p=0&boardCd=cm_car&isBoard=true"
+        )
         status, res_text = pycurl_get(search_url, headers=HEADERS, timeout=10)
         if status != 200:
             raise Exception(f"HTTP status {status}")
@@ -383,7 +393,7 @@ def fetch_tesla_clien():
         return []
 
 
-def fetch_tesla_dcincide():
+def fetch_tesla_dcincide(search_keyword="테슬라"):
     """
     Fetch Tesla-related posts from DCinside gallery.
 
@@ -391,6 +401,9 @@ def fetch_tesla_dcincide():
     1. Scrape the Tesla gallery listing page from DCinside
     2. Extract post titles, URLs, authors, and publication dates
     3. Visit each post URL to fetch full post content from the detail page
+
+    Args:
+        search_keyword: Keyword to search for (default: "테슬라")
 
     Returns:
         List of dictionaries containing post information with fields:
@@ -402,89 +415,100 @@ def fetch_tesla_dcincide():
         - source: "DCinside"
         - news_type: "domestic"
     """
-    items = []
-    list_url = "https://gall.dcinside.com/mgallery/board/lists/?id=tesla"
-
     try:
-        status, res_text = pycurl_get(list_url, headers=HEADERS, timeout=10)
+        items = []
+        # URL encode the search query for DCinside search
+        encoded_query = quote(search_keyword)
+
+        # Use "전기차" gallery which contains Tesla content
+        gallery_url = (
+            f"https://gall.dcinside.com/board/lists/?id=electric&s_type=search_subject_memo&s_keyword={encoded_query}"
+        )
+
+        status, res_text = pycurl_get(gallery_url, headers=HEADERS, timeout=10)
         if status != 200:
             raise Exception(f"HTTP status {status}")
-    except Exception as e:
-        logger.error(f"DCinside post list page fetch error: {e}")
-        return items
 
-    soup = BeautifulSoup(res_text, "html.parser")
-    table = soup.find("table", class_="gall_list")
-    if not table:
-        logger.error("Could not find DCinside gallery table")
-        return items
+        soup = BeautifulSoup(res_text, "html.parser")
+        post_list = soup.find("table", class_="gall_list")
+        if not post_list:
+            logger.error("Could not find DCinside gallery list")
+            return items
 
-    tbody = table.find("tbody", class_="listwrap2")
-    if not tbody:
-        logger.error("Could not find DCinside post list (tbody)")
-        return items
-
-    rows = tbody.find_all("tr", class_="ub-content")
-    for row in rows:
-        try:
-            # Extract title and URL
-            title_td = row.find("td", class_="gall_tit")
-            if not title_td:
-                continue
-            a_tag = title_td.find("a")
-            if not a_tag:
-                continue
-            href = a_tag.get("href", "")
-            if href.startswith("javascript:"):
-                continue  # Skip JavaScript calls (like surveys)
-            title = a_tag.get_text(strip=True)
-            full_url = urljoin("https://gall.dcinside.com", href)
-
-            # Extract author
-            writer_td = row.find("td", class_="gall_writer")
-            author = writer_td.get_text(strip=True) if writer_td else ""
-
-            # Extract publication date (use title attribute if available, otherwise inner text)
-            date_td = row.find("td", class_="gall_date")
-            if date_td:
-                published = date_td.get("title", date_td.get_text(strip=True))
-            else:
-                published = ""
-
-            # Extract post content from detail page (inline fetch_dcinside_post_content logic)
-            content = ""
+        # Process each post row
+        post_rows = post_list.select("tr.ub-content")
+        for row in post_rows:
             try:
-                status_detail, detail_text = pycurl_get(full_url, headers=HEADERS, timeout=10)
-                if status_detail == 200:
-                    detail_soup = BeautifulSoup(detail_text, "html.parser")
-                    article = detail_soup.find("article")
-                    if article:
-                        content_div = article.find("div", class_="writing_view_box")
-                        if not content_div:
-                            content_div = article.find("div", class_="write_div")
-                        if content_div:
-                            content = content_div.get_text(separator="\n", strip=True)
-                        else:
-                            content = article.get_text(separator="\n", strip=True)
-                    else:
-                        # fallback: <div class="view_content_wrap">
-                        content_div = detail_soup.find("div", class_="view_content_wrap")
-                        if content_div:
-                            content = content_div.get_text(separator="\n", strip=True)
-            except Exception as e:
-                logger.error(f"DCinside post detail content fetch error ({full_url}): {e}")
-                content = ""
+                # Skip notice or advertisement rows
+                if "notice" in row.get("class", []) or "ad" in row.get("class", []):
+                    continue
 
-            item = {
-                "title": title,
-                "url": full_url,
-                "author": author,
-                "published": published,
-                "content": content,
-                "source": "DCinside",
-                "news_type": "domestic",
-            }
-            items.append(item)
-        except Exception as e:
-            logger.error(f"DCinside post processing error: {e}")
-    return items
+                # Extract post title and link
+                subject_cell = row.find("td", class_="gall_tit")
+                if not subject_cell:
+                    continue
+
+                subject_link = subject_cell.find("a")
+                if not subject_link:
+                    continue
+
+                title = subject_link.get_text(strip=True)
+                relative_url = subject_link.get("href", "")
+
+                # Handle href format and create absolute URL
+                if relative_url.startswith("http"):
+                    full_url = relative_url
+                else:
+                    full_url = urljoin("https://gall.dcinside.com", relative_url)
+
+                # Extract author name
+                nick_cell = row.find("td", class_="gall_writer")
+                author = ""
+                if nick_cell:
+                    author_elem = nick_cell.find("span", {"class": ["nickname", "ip"]})
+                    if author_elem:
+                        author = author_elem.get_text(strip=True)
+
+                # Extract date
+                date_cell = row.find("td", class_="gall_date")
+                published = date_cell.get_text(strip=True) if date_cell else ""
+
+                # Fetch full content from post detail page
+                try:
+                    status_detail, detail_text = pycurl_get(full_url, headers=HEADERS, timeout=10)
+                    if status_detail != 200:
+                        raise Exception(f"HTTP status {status_detail}")
+
+                    detail_soup = BeautifulSoup(detail_text, "html.parser")
+                    content_container = detail_soup.find("div", class_="write_div")
+
+                    if content_container:
+                        # Clean content: remove script tags and style tags
+                        for script in content_container.find_all(["script", "style"]):
+                            script.decompose()
+
+                        # Extract text
+                        content = content_container.get_text(separator="\n", strip=True)
+                    else:
+                        logger.error(f"Could not find DCinside post content container ({full_url})")
+                        content = ""
+                except Exception as e:
+                    logger.error(f"DCinside post detail content fetch error ({full_url}): {e}")
+                    content = ""
+
+                item = {
+                    "title": title,
+                    "url": full_url,
+                    "author": author,
+                    "published": published,
+                    "content": content,
+                    "source": "DCinside",
+                    "news_type": "domestic",
+                }
+                items.append(item)
+            except Exception as e:
+                logger.error(f"DCinside post processing error: {e}")
+        return items
+    except Exception as e:
+        logger.error(f"DCinside news collection error: {e}")
+        return []

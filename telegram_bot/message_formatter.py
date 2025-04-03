@@ -27,26 +27,51 @@ CATEGORY_FIELD_INFO = {
             "trust_reason": "신뢰도 판단 기준",
         },
     },
-    "new_model": {
-        "display": "신모델 출시",
-        "emoji": "🚗✨",
+    "purchase_guide": {
+        "display": "구매 가이드",
+        "emoji": "🛒",
         "fields": {
             "title": "제목",
-            "model_name": "모델명",
-            "release_date": "출시일",
+            "model_info": "모델 정보",
+            "purchase_tips": "구매 팁",
             "details": "세부사항",
             "published": "뉴스 게시일",
             "trust": "신뢰도",
             "trust_reason": "신뢰도 판단 기준",
         },
     },
-    "autonomous_update": {
-        "display": "자율주행 기능 업데이트",
-        "emoji": "🤖",
+    "test_drive": {
+        "display": "시승 후기",
+        "emoji": "🚗",
         "fields": {
             "title": "제목",
-            "feature": "자율주행 기능",
-            "update_details": "업데이트 세부사항",
+            "model": "모델",
+            "review_highlights": "핵심 내용",
+            "details": "세부사항",
+            "published": "뉴스 게시일",
+            "trust": "신뢰도",
+            "trust_reason": "신뢰도 판단 기준",
+        },
+    },
+    "charging_info": {
+        "display": "충전 정보",
+        "emoji": "⚡",
+        "fields": {
+            "title": "제목",
+            "location": "충전소 위치",
+            "charging_details": "충전 세부사항",
+            "published": "뉴스 게시일",
+            "trust": "신뢰도",
+            "trust_reason": "신뢰도 판단 기준",
+        },
+    },
+    "supercharger_update": {
+        "display": "슈퍼차저 업데이트",
+        "emoji": "🔌",
+        "fields": {
+            "title": "제목",
+            "location": "위치",
+            "charger_details": "슈퍼차저 세부사항",
             "published": "뉴스 게시일",
             "trust": "신뢰도",
             "trust_reason": "신뢰도 판단 기준",
@@ -64,195 +89,32 @@ CATEGORY_FIELD_INFO = {
             "trust_reason": "신뢰도 판단 기준",
         },
     },
-    "infrastructure_update": {
-        "display": "충전 인프라 및 서비스 소식",
-        "emoji": "⚡",
+    "driving_tip": {
+        "display": "주행 팁",
+        "emoji": "🚘",
         "fields": {
             "title": "제목",
-            "infrastructure_details": "인프라 세부사항",
+            "tip_details": "주행 팁 내용",
+            "applicable_models": "적용 가능 모델",
             "published": "뉴스 게시일",
             "trust": "신뢰도",
             "trust_reason": "신뢰도 판단 기준",
         },
     },
-    "battery_update": {
-        "display": "배터리 및 성능 혁신",
-        "emoji": "🔋",
+    "maintenance_tip": {
+        "display": "유지보수 팁",
+        "emoji": "🔧",
         "fields": {
             "title": "제목",
-            "battery_details": "배터리/성능 세부사항",
-            "published": "뉴스 게시일",
-            "trust": "신뢰도",
-            "trust_reason": "신뢰도 판단 기준",
-        },
-    },
-    "policy_update": {
-        "display": "정부 정책 및 규제 동향",
-        "emoji": "🏛️",
-        "fields": {
-            "title": "제목",
-            "policy_details": "정책/규제 세부사항",
-            "published": "뉴스 게시일",
-            "trust": "신뢰도",
-            "trust_reason": "신뢰도 판단 기준",
-        },
-    },
-    "production_update": {
-        "display": "테슬라 생산 및 공급망 뉴스",
-        "emoji": "🏭",
-        "fields": {
-            "title": "제목",
-            "production_details": "생산/공급망 세부사항",
-            "published": "뉴스 게시일",
-            "trust": "신뢰도",
-            "trust_reason": "신뢰도 판단 기준",
-        },
-    },
-    "stock_update": {
-        "display": "테슬라 주식 및 투자 동향",
-        "emoji": "📈",
-        "fields": {
-            "title": "제목",
-            "stock_details": "주식/투자 세부사항",
-            "published": "뉴스 게시일",
-            "trust": "신뢰도",
-            "trust_reason": "신뢰도 판단 기준",
-        },
-    },
-    "ceo_statement": {
-        "display": "일론 머스크 및 CEO 발언",
-        "emoji": "🗣️",
-        "fields": {
-            "title": "제목",
-            "statement_details": "발언 세부사항",
-            "published": "뉴스 게시일",
-            "trust": "신뢰도",
-            "trust_reason": "신뢰도 판단 기준",
-        },
-    },
-    "global_trend": {
-        "display": "글로벌 테슬라 동향",
-        "emoji": "🌐",
-        "fields": {
-            "title": "제목",
-            "trend_details": "글로벌 동향 세부사항",
-            "published": "뉴스 게시일",
-            "trust": "신뢰도",
-            "trust_reason": "신뢰도 판단 기준",
-        },
-    },
-    "service_update": {
-        "display": "테슬라 서비스 및 고객 경험",
-        "emoji": "🛠️",
-        "fields": {
-            "title": "제목",
-            "service_details": "서비스 세부사항",
-            "published": "뉴스 게시일",
-            "trust": "신뢰도",
-            "trust_reason": "신뢰도 판단 기준",
-        },
-    },
-    "legal_update": {
-        "display": "테슬라 관련 법률 및 소송",
-        "emoji": "⚖️",
-        "fields": {
-            "title": "제목",
-            "legal_details": "법률/소송 세부사항",
-            "published": "뉴스 게시일",
-            "trust": "신뢰도",
-            "trust_reason": "신뢰도 판단 기준",
-        },
-    },
-    "event_update": {
-        "display": "테슬라 이벤트 및 팬 모임 소식",
-        "emoji": "🎉",
-        "fields": {
-            "title": "제목",
-            "event_details": "이벤트 세부사항",
-            "published": "뉴스 게시일",
-            "trust": "신뢰도",
-            "trust_reason": "신뢰도 판단 기준",
-        },
-    },
-    "security_update": {
-        "display": "테슬라 기술 및 사이버 보안 이슈",
-        "emoji": "🔒",
-        "fields": {
-            "title": "제목",
-            "security_details": "보안 이슈 세부사항",
-            "published": "뉴스 게시일",
-            "trust": "신뢰도",
-            "trust_reason": "신뢰도 판단 기준",
-        },
-    },
-    "comparison_update": {
-        "display": "테슬라와 경쟁사 비교",
-        "emoji": "🤝",
-        "fields": {
-            "title": "제목",
-            "comparison_details": "경쟁사 비교 세부사항",
-            "published": "뉴스 게시일",
-            "trust": "신뢰도",
-            "trust_reason": "신뢰도 판단 기준",
-        },
-    },
-    "mobility_update": {
-        "display": "미래 모빌리티 및 로보택시/사이버트럭",
-        "emoji": "🚀",
-        "fields": {
-            "title": "제목",
-            "mobility_details": "미래 모빌리티 세부사항",
-            "published": "뉴스 게시일",
-            "trust": "신뢰도",
-            "trust_reason": "신뢰도 판단 기준",
-        },
-    },
-    "marketing_update": {
-        "display": "테슬라 브랜드 이미지 및 마케팅 전략",
-        "emoji": "📢",
-        "fields": {
-            "title": "제목",
-            "marketing_details": "마케팅 세부사항",
-            "published": "뉴스 게시일",
-            "trust": "신뢰도",
-            "trust_reason": "신뢰도 판단 기준",
-        },
-    },
-    "strategy_update": {
-        "display": "테슬라 인수합병 및 기업 전략",
-        "emoji": "💼",
-        "fields": {
-            "title": "제목",
-            "strategy_details": "기업 전략 세부사항",
-            "published": "뉴스 게시일",
-            "trust": "신뢰도",
-            "trust_reason": "신뢰도 판단 기준",
-        },
-    },
-    "community_update": {
-        "display": "테슬라 팬 커뮤니티 및 소셜 미디어 트렌드",
-        "emoji": "💬",
-        "fields": {
-            "title": "제목",
-            "community_details": "커뮤니티 세부사항",
-            "published": "뉴스 게시일",
-            "trust": "신뢰도",
-            "trust_reason": "신뢰도 판단 기준",
-        },
-    },
-    "analysis_update": {
-        "display": "경제·금융 및 산업 분석",
-        "emoji": "📊",
-        "fields": {
-            "title": "제목",
-            "analysis_details": "분석 세부사항",
+            "maintenance_details": "유지보수 내용",
+            "applicable_models": "적용 가능 모델",
             "published": "뉴스 게시일",
             "trust": "신뢰도",
             "trust_reason": "신뢰도 판단 기준",
         },
     },
     "subsidy_info": {
-        "display": "테슬라 구매 보조금 정보",
+        "display": "보조금 정보",
         "emoji": "💰",
         "fields": {
             "title": "제목",
@@ -265,8 +127,116 @@ CATEGORY_FIELD_INFO = {
             "published": "게시일",
         },
     },
+    "model3_info": {
+        "display": "모델3 정보",
+        "emoji": "3️⃣",
+        "fields": {
+            "title": "제목",
+            "specific_info": "모델3 관련 정보",
+            "details": "세부사항",
+            "published": "뉴스 게시일",
+            "trust": "신뢰도",
+            "trust_reason": "신뢰도 판단 기준",
+        },
+    },
+    "modelY_info": {
+        "display": "모델Y 정보",
+        "emoji": "🅨",
+        "fields": {
+            "title": "제목",
+            "specific_info": "모델Y 관련 정보",
+            "details": "세부사항",
+            "published": "뉴스 게시일",
+            "trust": "신뢰도",
+            "trust_reason": "신뢰도 판단 기준",
+        },
+    },
+    "modelS_info": {
+        "display": "모델S 정보",
+        "emoji": "🅢",
+        "fields": {
+            "title": "제목",
+            "specific_info": "모델S 관련 정보",
+            "details": "세부사항",
+            "published": "뉴스 게시일",
+            "trust": "신뢰도",
+            "trust_reason": "신뢰도 판단 기준",
+        },
+    },
+    "modelX_info": {
+        "display": "모델X 정보",
+        "emoji": "🅧",
+        "fields": {
+            "title": "제목",
+            "specific_info": "모델X 관련 정보",
+            "details": "세부사항",
+            "published": "뉴스 게시일",
+            "trust": "신뢰도",
+            "trust_reason": "신뢰도 판단 기준",
+        },
+    },
+    "cybertruck_info": {
+        "display": "사이버트럭 정보",
+        "emoji": "🛻",
+        "fields": {
+            "title": "제목",
+            "specific_info": "사이버트럭 관련 정보",
+            "details": "세부사항",
+            "published": "뉴스 게시일",
+            "trust": "신뢰도",
+            "trust_reason": "신뢰도 판단 기준",
+        },
+    },
+    "feature_how_to": {
+        "display": "기능 사용법",
+        "emoji": "📱",
+        "fields": {
+            "title": "제목",
+            "feature_name": "기능명",
+            "how_to_details": "사용 방법",
+            "published": "뉴스 게시일",
+            "trust": "신뢰도",
+            "trust_reason": "신뢰도 판단 기준",
+        },
+    },
+    "service_center": {
+        "display": "서비스센터 정보",
+        "emoji": "🏢",
+        "fields": {
+            "title": "제목",
+            "location": "위치",
+            "service_details": "서비스 정보",
+            "published": "뉴스 게시일",
+            "trust": "신뢰도",
+            "trust_reason": "신뢰도 판단 기준",
+        },
+    },
+    "accessory_info": {
+        "display": "액세서리 및 부품 정보",
+        "emoji": "🔌",
+        "fields": {
+            "title": "제목",
+            "accessory_details": "액세서리 정보",
+            "applicable_models": "호환 모델",
+            "published": "뉴스 게시일",
+            "trust": "신뢰도",
+            "trust_reason": "신뢰도 판단 기준",
+        },
+    },
+    "owner_experience": {
+        "display": "오너 경험담",
+        "emoji": "👨‍👩‍👧‍👦",
+        "fields": {
+            "title": "제목",
+            "experience_details": "경험 내용",
+            "model": "차량 모델",
+            "published": "뉴스 게시일",
+            "trust": "신뢰도",
+            "trust_reason": "신뢰도 판단 기준",
+        },
+    },
     "useful_info": {
-        "display": "테슬라 유용한 정보",
+        "display": "유용한 테슬라 정보",
         "emoji": "👍",
         "fields": {
             "title": "제목",
@@ -286,7 +256,7 @@ def format_detailed_message(news_categories: dict, news_type: str, language="ko"
 
     Args:
         news_categories: Dictionary with category keys and lists of news items
-        news_type: Type of news ("domestic" or "international")
+        news_type: Type of news ("news" or "info")
         language: Language code for formatting (default: "ko" for Korean)
         url_mapping: Optional mapping of titles to URLs for citation links
 
@@ -371,7 +341,8 @@ def format_detailed_message(news_categories: dict, news_type: str, language="ko"
                     additional_citations.append(f"<a href='{link_cit}'>{title_cit}</a>")
 
             # Format message components
-            header = f"{info['emoji']} <a href='{citation_header_link}'><b>[{'국내' if news_type=='domestic' else '해외'}] {info['display']} 뉴스 - {title}</b></a>"
+            source_type_text = "공식 뉴스" if news_type == "news" else "커뮤니티 정보"
+            header = f"{info['emoji']} <a href='{citation_header_link}'><b>[{source_type_text}] {info['display']} - {title}</b></a>"
             detail_lines = []
             for field_key, label in info["fields"].items():
                 if field_key in ["trust", "trust_reason", "published"]:
@@ -384,7 +355,7 @@ def format_detailed_message(news_categories: dict, news_type: str, language="ko"
             trust_line = f"<b>신뢰도:</b> {trust}\n<b>신뢰도 판단 기준:</b> {trust_reason}"
             citation_lines = ""
             if additional_citations:
-                citation_lines = "<b>인용 기사:</b> " + " | ".join(additional_citations)
+                citation_lines = "<b>인용 링크:</b> " + " | ".join(additional_citations)
 
             # Combine message components
             full_message = (

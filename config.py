@@ -31,6 +31,9 @@ DEFAULT_LANGUAGE = os.getenv("DEFAULT_LANGUAGE", "ko")  # "ko" or "en"
 SCRAPE_INTERVAL = int(os.getenv("SCRAPE_INTERVAL", 1800))  # default 1800 seconds (30 minutes)
 FIRST_SCRAPE_DELAY = int(os.getenv("FIRST_SCRAPE_DELAY", 10))  # delay before first scrape (seconds)
 
+# Search keywords
+SEARCH_KEYWORDS = os.getenv("SEARCH_KEYWORDS", "테슬라,tesla").split(",")
+
 # Webhook settings (example: https://yourdomain.com/<bot_token>)
 WEBHOOK_URL = os.getenv("WEBHOOK_URL")  # must be an externally accessible HTTPS URL
 WEBHOOK_PORT = int(os.getenv("WEBHOOK_PORT", 8080))
